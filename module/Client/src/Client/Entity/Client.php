@@ -18,6 +18,11 @@ class Client {
     */
     protected $clientId;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Account\Entity\Account", mappedBy="client")
+     */
+    protected $accounts;
+
     /** 
     * @ORM\Column(type="string")
     * @Annotation\Attributes({"type":"text"})
@@ -104,9 +109,16 @@ class Client {
 	// 	return (isset($this->{$property}) ? $this->{$property} : null);
 	// }
 
+    public function __construct() {
+        $this->accounts = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
     //Getters
     public function getClientId() {
     	return $this->clientId;
+    }
+    public function getAccounts() {
+        return $this->accounts;
     }
     public function getFirstName() {
     	return $this->firstName;
@@ -143,6 +155,9 @@ class Client {
     }
 
     //Setters
+    public function setAccounts($a) {
+        $this->accounts = $a;
+    }
     public function setFirstName($fn) {
     	$this->firstName = $fn;
     }

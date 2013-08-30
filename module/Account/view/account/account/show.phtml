@@ -1,46 +1,45 @@
 <?php
-  $client = $this->client;
+  $account = $this->account;
+  $client = $this->account->getClient();
   $client_html =  $client->getLastName() . ", " . $client->getFirstName();
   $client_status_html = "Pending";
   $form = $this->form;
   $form->prepare();
-  $form->setAttribute('action', '/clients/Client/edit');
+  $form->setAttribute('action', '/accounts/Account/edit');
   $form->setAttribute('method', 'post');
   $form->setAttribute('class', 'form-horizontal');
+
   $attrs = array(
-    'firstName', 
-    'lastName', 
-    'stateId',
-    'status', 
-    'phoneHome', 
-    'phoneWork',
-    'phoneReference',
-    'phoneCell',
-    'addressHome',
-    'addressWork',
+    'startWeek',
+    'amount', 
+    'nPayments',
+    'nPaid',
+    'status'
     );
+
 ?>
 
 <h2> <?php echo ucwords($client_html); ?> <small> <?php echo $client_status_html;?></small> </h2>
 <div class='tabbable'>
   <ul class='nav nav-tabs'>
-    <li class='active'><a href='#client_info' data-toggle='tab'> Informacion</a></li>
+    <li class='active'><a href='#account_info' data-toggle='tab'> Informacion</a></li>
   </ul>
   
   <div class='tab-content'>
     
-    <div class='tab-pane active' id='client_info'>
+    <div class='tab-pane active' id='account_info'>
     <?php
+    echo $this->form()->openTag($form);
     echo $this->form()->openTag($form);
     foreach ($attrs as $attr) {
       echo $this->formRow($form->get($attr));
     }
     //echo $this->formCollection($form);
     ?>
-    <input type="hidden" name="clientId" value="<?php echo $client->getClientId(); ?>"/>
+    <input type="hidden" name="accountId" value="<?php echo $account->getAccountId(); ?>"/>
     <div class='form-actions'>
         <button type='submit' class='btn btn-primary'> Actualizar </button>
-        <button type='submit' class='btn btn-danger' formaction="/clients/Client/delete"> Delete </button>
+        <button type='submit' class='btn btn-danger' formaction="/accounts/Account/delete"> Delete </button>
     </div> 
     <?php
         echo $this->form()->closeTag($form);
