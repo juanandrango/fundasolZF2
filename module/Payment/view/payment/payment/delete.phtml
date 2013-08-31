@@ -1,0 +1,9 @@
+<h2> Delete Payment </h2>
+<form action='delete' method='post'>
+	<p>Are you sure you want to delete payment <?php echo $this->paymentId; ?> ?</p>
+	<div class="form-actions">
+		<input type="hidden" name="paymentId" value="<?php echo $this->paymentId; ?>"/>
+		<button type="submit" name="sureDelete" value="yes" class="btn btn-danger"> Yes </button>
+		<button type="submit" name="sureDelete" value="no" class="btn"> No </button>
+	</div>
+</form>

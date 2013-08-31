@@ -37,6 +37,11 @@ class Account {
     * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^\d+$/"}})
     */
     protected $amount;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Payment\Entity\Payment", mappedBy="account")
+     */
+    protected $payments;
     
     /**
     * @ORM\Column(type="string", nullable = false)
@@ -78,6 +83,10 @@ class Account {
     */
     protected $timeStamp;
 
+    public function __construct() {
+        $this->payments = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
     //Getters
     public function getAccountId() {
         return $this->accountId;
@@ -87,6 +96,9 @@ class Account {
     }
     public function getAmount() {
         return $this->amount;
+    }
+    public function getPayments() {
+        return $this->payments;
     }
     public function getNPayments() {
         return $this->nPayments;
@@ -109,6 +121,9 @@ class Account {
     }
     public function setAmount($newAmount) {
         $this->amount = $newAmount;
+    }
+    public function setPayments($p) {
+        $this->payments = $p;
     }
     public function setNPayments($np) {
         $this->nPayments = $np;

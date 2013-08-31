@@ -1,64 +1,115 @@
 <?php
-  $account = $this->account;
-  $client = $this->account->getClient();
-  $client_html =  $client->getLastName() . ", " . $client->getFirstName();
-  $client_status_html = "Pending";
-  $form = $this->form;
-  $form->prepare();
-  $form->setAttribute('action', '/accounts/Account/edit');
-  $form->setAttribute('method', 'post');
-  $form->setAttribute('class', 'form-horizontal');
+$account = $this->account;
+$client = $this->account->getClient();
+$client_html =  $client->getLastName() . ", " . $client->getFirstName();
+$client_status_html = "Pending";
+$payments = $account->getPayments();
+$form = $this->form;
+$form->prepare();
+$form->setAttribute('action', '/accounts/Account/edit');
+$form->setAttribute('method', 'post');
+$form->setAttribute('class', 'form-horizontal');
 
-  $attrs = array(
-    'startWeek',
-    'amount', 
-    'nPayments',
-    'nPaid',
-    'status'
-    );
+$attrs = array(
+  'startWeek',
+  'amount', 
+  'nPayments',
+  'nPaid',
+  'status'
+  );
 
-?>
 
-<h2> Account <?php echo $account->getAccountId(); ?> <small> <?php echo ucwords($client_html); ?></small> </h2>
-<div class='tabbable'>
-  <ul class='nav nav-tabs'>
-    <li class='active'><a href='#account_info' data-toggle='tab'> Informacion</a></li>
-  </ul>
-  
-  <div class='tab-content'>
-    
-    <div class='tab-pane active' id='account_info'>
-    <?php
-    echo $this->form()->openTag($form);
-    foreach ($attrs as $attr) {
-      echo $this->formRow($form->get($attr));
-    }
+$paymentAttrs = array(
+  'amount', 
+  'paymentNumber', 
+  'timeStamp', 
+  'status'
+  );
+
+
+  ?>
+
+  <h2> Account <?php echo $account->getAccountId(); ?> <small> <?php echo ucwords($client_html); ?></small> </h2>
+  <div class='tabbable'>
+    <ul class='nav nav-tabs'>
+      <li class='active'><a href='#account_info' data-toggle='tab'> Informacion</a></li>
+      <li><a href='#account_payments' data-toggle='tab'>Payments</a></li>
+    </ul>
+
+    <div class='tab-content'>
+
+      <div class='tab-pane active' id='account_info'>
+        <?php
+        echo $this->form()->openTag($form);
+        foreach ($attrs as $attr) {
+          echo $this->formRow($form->get($attr));
+        }
     //echo $this->formCollection($form);
-    ?>
-    <input type="hidden" name="accountId" value="<?php echo $account->getAccountId(); ?>"/>
-    <div class='form-actions'>
-        <button type='submit' class='btn btn-primary'> Actualizar </button>
-        <button type='submit' class='btn btn-danger' formaction="/accounts/Account/delete"> Delete </button>
-    </div> 
-    <?php
+        ?>
+        <input type="hidden" name="accountId" value="<?php echo $account->getAccountId(); ?>"/>
+        <div class='form-actions'>
+          <button type='submit' class='btn btn-primary'> Actualizar </button>
+          <button type='submit' class='btn btn-danger' formaction="/accounts/Account/delete"> Delete </button>
+        </div> 
+        <?php
         echo $this->form()->closeTag($form);
-    ?>
-    </div>    
+        ?>
+      </div>    
+
+      <!-- Payments Tab Section -->
+
+      <div class='tab-pane' id='account_payments'>
+        <form action="/payments/Payment/add" method="post">
+          <input type="hidden" name="accountId" value="<?php echo $account->getAccountId(); ?>"/>
+          <input type="submit" class='btn' value="Hacer Un Pago"/>
+        </form>
+        <table class='table'> 
+          <thead>
+            <tr>
+              <?php
+              if (count($payments) !== 0) {
+                foreach($paymentAttrs as $attr ) {
+                  echo "<th>" . $attr . "</th>";
+                }
+              }
+              ?>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+            foreach($payments as $tmp_payment) {
+              echo "<tr>";
+              ?>
+              <td><a href="<?php echo $this->url('payments/Payment', array('action'=>'show', 'paymentId' => $tmp_payment->getPaymentId() ));?>"> <?php echo $tmp_payment->getAmount(); ?> </a></td>
+              <td><a href="<?php echo $this->url('payments/Payment', array('action'=>'show', 'paymentId' => $tmp_payment->getPaymentId() ));?>"> <?php echo $tmp_payment->getPaymentNumber(); ?> </a></td>
+              <td><a href="<?php echo $this->url('payments/Payment', array('action'=>'show', 'paymentId' => $tmp_payment->getPaymentId() ));?>"> <?php echo $tmp_payment->getTimeStamp()->format('Y-m-d h:i:s'); ?> </a></td>
+              <td><a href="<?php echo $this->url('payments/Payment', array('action'=>'show', 'paymentId' => $tmp_payment->getPaymentId() ));?>"> <?php echo $tmp_payment->getStatus(); ?> </a></td>
+              <?php
+              echo "</tr>";
+            }
+            ?>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- End Payments Tab Section -->
+
+
+    </div>
   </div>
-</div>
 
-<script>
+  <script>
 
-$("label span").each(function() {
+  $("label span").each(function() {
     var $this = $(this);
     $this.replaceWith($("<label class='control-label'><strong>" + $this.html() + "</strong></label>"));
-});
+  });
 
-$("div label").each(function() {
+  $("div label").each(function() {
     var $this = $(this);
     $this.replaceWith($("<div class='control-group'>" + $this.html() + "</div>"));
-});
+  });
 
-$('input').wrap('<div class="controls" />');
+  $('input').wrap('<div class="controls" />');
 
-</script>
+  </script>

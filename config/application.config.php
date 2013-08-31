@@ -6,6 +6,7 @@ return array(
         'Fundasol',
         'Client',
         'Account',
+        'Payment',
         'ZendDeveloperTools',
         'DoctrineModule',
         'DoctrineORMModule'
