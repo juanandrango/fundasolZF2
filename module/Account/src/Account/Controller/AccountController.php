@@ -73,28 +73,51 @@ class AccountController extends AbstractActionController
         }
     }
     public function addAction() {
-        $objectManager = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
-        $builder = new AnnotationBuilder($objectManager);
-        $form = $builder->createForm(new \Account\Entity\Account);
-        $form->setHydrator(new DoctrineHydrator($objectManager,'Account\Entity\Account'));
-        $account = new \Account\Entity\Account;
-        $form->bind($account);
-        if ($this->getRequest()->isPost()) {
-            $form->setData($this->getRequest()->getPost());
-            if ($form->isValid()) {
-                $account->setTimeStamp();
-                $objectManager->persist($account);          
-                $objectManager->flush();
-                $accountId = $account->getAccountId();                             
-                $this->redirect()->toRoute('accounts/Account', 
-                    array(
-                        'action' => 'show',
-                        'accountId' => $accountId, 
-                    )
-                );
-            }
+        if($this->getRequest()->isPost()) {
+             $objectManager = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+            $builder = new AnnotationBuilder($objectManager);
+            $form = $builder->createForm(new \Account\Entity\Account);
+            $form->setHydrator(new DoctrineHydrator($objectManager,'Account\Entity\Account'));           
+            $clientId = (int)$this->getRequest()->getPost('clientId');
+            if ($clientId != null) {
+                $client = $objectManager->getRepository('Client\Entity\Client')->findOneBy(array('clientId' => $clientId));
+                if ($client != null) {
+                    $account = new \Account\Entity\Account;
+                    $form->bind($account);
+                    if ($this->getRequest()->getPost('addAccountSubmit') != null) {
+                        //Validate and process
+                        $form->setData($this->getRequest()->getPost());
+                        if ($form->isValid()) {
+                            $account->setTimeStamp();
+                            $account->setClient($client);
+                            $objectManager->persist($account);
+                            $client->getAccounts()->add($account);
+                            //$objectManager->persist($client);          
+                            $objectManager->flush();
+                            $accountId = $account->getAccountId();                                                         
+                            return $this->redirect()->toRoute('accounts/Account', 
+                                array(
+                                    'action'    => 'show',
+                                    'accountId'   => $accountId
+                                )
+                            );
+                        } 
+                    } 
+                    //First Time 
+                    return new ViewModel( array('form' => $form, 'clientId' => $clientId));
+                } else {
+                    //No client Found with client ID
+                    return $this->redirect()->toRoute('home');
+                }
+            } else {
+                //No client ID given
+                return $this->redirect()->toRoute('home');
+            }   
+        } else {
+            //No Post at all
+            return $this->redirect()->toRoute('home');
         }
-        return new ViewModel( array('form' => $form)); 
+        return $this->redirect()->toRoute('home');
     }
     public function deleteAction() {
         $accountId = $this->getRequest()->getPost('accountId');
@@ -102,19 +125,21 @@ class AccountController extends AbstractActionController
             $objectManager = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
             $account = $objectManager->getRepository('Account\Entity\Account')->findOneBy(array("accountId" => $accountId));
             if ($account != null) {
+                $client = $account->getClient();
+                $client->getAccounts()->remove($account);
                 $objectManager->remove($account);
                 $objectManager->flush();
-                 $this->redirect()->toRoute('accounts/Account', 
+                $this->redirect()->toRoute('accounts/Account', 
                     array(
                         'action' => 'showAll',
                     )
                 );
             } else {
                 //No Account found
-                $this->redirect()->toRoute('home');
+                return $this->redirect()->toRoute('home');
             }
         } else if($this->getRequest()->getPost('sureDelete') == 'no') {
-             $this->redirect()->toRoute('accounts/Account', 
+             return $this->redirect()->toRoute('accounts/Account', 
                 array(
                     'action' => 'show',
                     'accountId' => $accountId, 

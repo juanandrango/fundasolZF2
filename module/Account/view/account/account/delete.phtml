@@ -1,8 +1,8 @@
-<h2> Delete Client </h2>
+<h2> Delete Account </h2>
 <form action='delete' method='post'>
-	<p>Are you sure you want to delete client <?php echo $this->clientId; ?> ?</p>
+	<p>Are you sure you want to delete account <?php echo $this->accountId; ?> ?</p>
 	<div class="form-actions">
-		<input type="hidden" name="clientId" value="<?php echo $this->clientId; ?>"/>
+		<input type="hidden" name="accountId" value="<?php echo $this->accountId; ?>"/>
 		<button type="submit" name="sureDelete" value="yes" class="btn btn-danger"> Yes </button>
 		<button type="submit" name="sureDelete" value="no" class="btn"> No </button>
 	</div>

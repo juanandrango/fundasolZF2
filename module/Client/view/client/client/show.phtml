@@ -1,52 +1,98 @@
 <?php
-  $client = $this->client;
-  $client_html =  $client->getLastName() . ", " . $client->getFirstName();
-  $client_status_html = "Pending";
-  $form = $this->form;
-  $form->prepare();
-  $form->setAttribute('action', '/clients/Client/edit');
-  $form->setAttribute('method', 'post');
-  $form->setAttribute('class', 'form-horizontal');
-  $attrs = array(
-    'firstName', 
-    'lastName', 
-    'stateId',
-    'status', 
-    'phoneHome', 
-    'phoneWork',
-    'phoneReference',
-    'phoneCell',
-    'addressHome',
-    'addressWork',
+    $client = $this->client;
+    $accounts = $client->getAccounts();
+    $client_html =  $client->getLastName() . ", " . $client->getFirstName();
+    $client_status_html = "Pending";
+    $form = $this->form;
+    $form->prepare();
+    $form->setAttribute('action', '/clients/Client/edit');
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('class', 'form-horizontal');
+    $attrs = array(
+        'firstName', 
+        'lastName', 
+        'stateId',
+        'status', 
+        'phoneHome', 
+        'phoneWork',
+        'phoneReference',
+        'phoneCell',
+        'addressHome',
+        'addressWork',
     );
+    $accountAttrs = array(
+        'ID',
+        'Amount',
+        'Start Week',
+        'Payments',
+        '# Paid',
+        'status'
+        );
 ?>
 
 <h2> <?php echo ucwords($client_html); ?> <small> <?php echo $client_status_html;?></small> </h2>
+
 <div class='tabbable'>
-  <ul class='nav nav-tabs'>
-    <li class='active'><a href='#client_info' data-toggle='tab'> Informacion</a></li>
-  </ul>
-  
-  <div class='tab-content'>
-    
-    <div class='tab-pane active' id='client_info'>
-    <?php
-    echo $this->form()->openTag($form);
-    foreach ($attrs as $attr) {
-      echo $this->formRow($form->get($attr));
-    }
-    //echo $this->formCollection($form);
-    ?>
-    <input type="hidden" name="clientId" value="<?php echo $client->getClientId(); ?>"/>
-    <div class='form-actions'>
-        <button type='submit' class='btn btn-primary'> Actualizar </button>
-        <button type='submit' class='btn btn-danger' formaction="/clients/Client/delete"> Delete </button>
-    </div> 
-    <?php
-        echo $this->form()->closeTag($form);
-    ?>
-    </div>    
-  </div>
+    <ul class='nav nav-tabs'>
+        <li class='active'><a href='#client_info' data-toggle='tab'> Informacion</a></li>
+        <li><a href='#client_accounts' data-toggle='tab'>Cuentas</a></li>
+    </ul>
+
+    <div class='tab-content'>
+
+        <div class='tab-pane active' id='client_info'>
+            <?php
+                echo $this->form()->openTag($form);
+                foreach ($attrs as $attr) {
+                    echo $this->formRow($form->get($attr));
+                }
+            ?>
+            <input type="hidden" name="clientId" value="<?php echo $client->getClientId(); ?>"/>
+            <div class='form-actions'>
+                <button type='submit' class='btn btn-primary'> Actualizar </button>
+                <button type='submit' class='btn btn-danger' formaction="/clients/Client/delete"> Delete </button>
+            </div> 
+            <?php
+                echo $this->form()->closeTag($form);
+            ?>
+        </div>    
+
+        <div class='tab-pane' id='client_accounts'>
+            <form action="/accounts/Account/add" method="post">
+                <input type="hidden" name="clientId" value="<?php echo $client->getClientId(); ?>"/>
+                <input type="submit" class='btn' value="Create Cuenta" formaction="/accounts/Account/add" />
+            </form>
+            <table class='table'> 
+                <thead>
+                    <tr>
+                        <?php
+                            if (count($accounts) !== 0) {
+                                foreach($accountAttrs as $attr ) {
+                                    echo "<th>" . $attr . "</th>";
+                                }
+                            }
+                        ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                        foreach($accounts as $tmp_account) {
+                            echo "<tr>";
+                    ?>
+                    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getAccountId(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getAmount(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getStartWeek(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getNPayments(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getNPaid(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getStatus(); ?> </a></td>
+                    <?php
+                            echo "</tr>";
+                        }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>

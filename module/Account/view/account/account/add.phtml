@@ -23,7 +23,8 @@
     }
 ?>
 <div class='form-actions'>
-    <button type='submit' class='btn btn-primary'> Add </button>
+    <input type='hidden' name="clientId" value="<?php echo $this->clientId; ?>" />
+    <button type='submit' name="addAccountSubmit" value="submit" class='btn btn-primary'> Add </button>
 </div> 
 <?php
     echo $this->form()->closeTag($form);

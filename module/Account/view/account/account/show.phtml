@@ -19,7 +19,7 @@
 
 ?>
 
-<h2> <?php echo ucwords($client_html); ?> <small> <?php echo $client_status_html;?></small> </h2>
+<h2> Account <?php echo $account->getAccountId(); ?> <small> <?php echo ucwords($client_html); ?></small> </h2>
 <div class='tabbable'>
   <ul class='nav nav-tabs'>
     <li class='active'><a href='#account_info' data-toggle='tab'> Informacion</a></li>
@@ -29,7 +29,6 @@
     
     <div class='tab-pane active' id='account_info'>
     <?php
-    echo $this->form()->openTag($form);
     echo $this->form()->openTag($form);
     foreach ($attrs as $attr) {
       echo $this->formRow($form->get($attr));

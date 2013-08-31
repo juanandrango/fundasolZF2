@@ -19,36 +19,48 @@ class Account {
     protected $accountId;
 
     /**
-    * @ORM\Column(type="integer", nullable = false)
+    * @ORM\Column(type="string", nullable = false)
     * @Annotation\Attributes({"type":"text"})
     * @Annotation\Options({"label":"Start Week:"})
+    * @Annotation\Filter({"name": "StringTrim"})
+    * @Annotation\Validator({"name":"NotEmpty"})
+    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^\d+$/"}})
     */
     protected $startWeek;
     
     /**
-    * @ORM\Column(type="integer", nullable = false)
+    * @ORM\Column(type="string", nullable = false)
     * @Annotation\Attributes({"type":"text"})
     * @Annotation\Options({"label":"Amount:"})
+    * @Annotation\Filter({"name": "StringTrim"})
+    * @Annotation\Validator({"name":"NotEmpty"})
+    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^\d+$/"}})
     */
     protected $amount;
     
     /**
-    * @ORM\Column(type="integer", nullable = false)
+    * @ORM\Column(type="string", nullable = false)
     * @Annotation\Attributes({"type":"text"})
     * @Annotation\Options({"label":"number of Payments:"})
+    * @Annotation\Filter({"name": "StringTrim"})
+    * @Annotation\Validator({"name":"NotEmpty"})
+    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^\d+$/"}})
     */
     protected $nPayments;
   
-     /**
-     * @ORM\ManyToOne(targetEntity="Client\Entity\Client", inversedBy="accounts")
-     * @ORM\JoinColumn(name="myClientId", referencedColumnName="clientId")
+    /**
+    * @ORM\ManyToOne(targetEntity="Client\Entity\Client", inversedBy="accounts")
+    * @ORM\JoinColumn(name="myClientId", referencedColumnName="clientId")
      **/
     protected $client;
     
     /**
-    * @ORM\Column(type="integer", nullable = false)
+    * @ORM\Column(type="string", nullable = false)
     * @Annotation\Attributes({"type":"text"})
     * @Annotation\Options({"label":"Number Paid:"})
+    * @Annotation\Filter({"name": "StringTrim"})
+    * @Annotation\Validator({"name":"NotEmpty"})
+    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^\d+$/"}})
     */
     protected $nPaid;
    
