@@ -81,7 +81,7 @@
                     ?>
                     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getAccountId(); ?> </a></td>
                     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getAmount(); ?> </a></td>
-                    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getStartWeek(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getFirstPayDateStr(); ?> </a></td>
                     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getNPayments(); ?> </a></td>
                     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getNPaid(); ?> </a></td>
                     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getStatus(); ?> </a></td>

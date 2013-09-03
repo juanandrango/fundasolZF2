@@ -1,0 +1,40 @@
+<h2> New Payment </h2>
+
+<form action="/accounts/Account/pay" method="post" name="Payment" class="form-horizontal" id="Payment">
+    <label><span>Amount:</span><input name="amount" type="text" value="<?php echo $this->amount; ?>"></label>
+    <div class='form-actions'>
+        <input type='hidden' name="accountId" value="<?php echo $this->accountId; ?>" />
+        <button type='submit' name="paySubmit" value="submit" class='btn btn-primary'> Make Payment </button>
+        <button href="#" id="editPaySubmit" class='btn'> Edit Amount </button>
+    </div> 
+</form>
+
+<script>
+
+$("label span").each(function() {
+    var $this = $(this);
+    $this.replaceWith($("<label class='control-label'><strong>" + $this.html() + "</strong></label>"));
+});
+
+$("div label").each(function() {
+    var $this = $(this);
+    $this.replaceWith($("<div class='control-group'>" + $this.html() + "</div>"));
+});
+
+$('input').wrap('<div class="controls" />');
+$('input').attr('readonly', true);
+
+$('#editPaySubmit').click(function() {
+    $('input').attr('readonly', false);    
+    return false;
+})
+
+</script>
+
+
+
+
+
+
+
+

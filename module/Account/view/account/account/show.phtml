@@ -4,26 +4,23 @@ $client = $this->account->getClient();
 $client_html =  $client->getLastName() . ", " . $client->getFirstName();
 $client_status_html = "Pending";
 $payments = $account->getPayments();
-$form = $this->form;
-$form->prepare();
-$form->setAttribute('action', '/accounts/Account/edit');
-$form->setAttribute('method', 'post');
-$form->setAttribute('class', 'form-horizontal');
 
 $attrs = array(
-  'startWeek',
+  'firstPayDate',
   'amount', 
   'nPayments',
   'nPaid',
+  'payPeriod',
   'status'
   );
 
 
 $paymentAttrs = array(
-  'amount', 
-  'paymentNumber', 
-  'timeStamp', 
-  'status'
+  'Amount', 
+  'Payment Number', 
+  'Due Date', 
+  'Paid Date',
+  'Status'
   );
 
 
@@ -32,37 +29,75 @@ $paymentAttrs = array(
   <h2> Account <?php echo $account->getAccountId(); ?> <small> <?php echo ucwords($client_html); ?></small> </h2>
   <div class='tabbable'>
     <ul class='nav nav-tabs'>
-      <li class='active'><a href='#account_info' data-toggle='tab'> Informacion</a></li>
-      <li><a href='#account_payments' data-toggle='tab'>Payments</a></li>
+      <li class='active'><a href='#account_payments' data-toggle='tab'>Payments</a></li>
+      <li><a href='#account_info' data-toggle='tab'> Informacion</a></li>
     </ul>
 
     <div class='tab-content'>
 
-      <div class='tab-pane active' id='account_info'>
-        <?php
-        echo $this->form()->openTag($form);
-        foreach ($attrs as $attr) {
-          echo $this->formRow($form->get($attr));
-        }
-    //echo $this->formCollection($form);
-        ?>
-        <input type="hidden" name="accountId" value="<?php echo $account->getAccountId(); ?>"/>
-        <div class='form-actions'>
-          <button type='submit' class='btn btn-primary'> Actualizar </button>
-          <button type='submit' class='btn btn-danger' formaction="/accounts/Account/delete"> Delete </button>
-        </div> 
-        <?php
-        echo $this->form()->closeTag($form);
-        ?>
+      
+      <div class='tab-pane' id='account_info'>
+        <div class="row-fluid"> 
+          <div class="span2 offset1">
+            <label class="control-label">
+              <strong>Payments Start:</strong>
+            </label>
+          </div>
+          <div class= "span9"> <label> <?php echo $account->getFirstPayDate(); ?> </label> </div> 
+        </div>
+        <div class="row-fluid"> 
+          <div class="span2 offset1">
+            <label class="control-label">
+              <strong>Amount:</strong>
+            </label>
+          </div>
+          <div class= "span9"> <label> <?php echo $account->getAmount(); ?> </label> </div> 
+        </div>
+        <div class="row-fluid"> 
+          <div class="span2 offset1">
+            <label class="control-label">
+              <strong>Number of Payments:</strong>
+            </label>
+          </div>
+          <div class= "span9"> <label> <?php echo $account->getNPayments(); ?> </label> </div> 
+        </div>
+        <div class="row-fluid"> 
+          <div class="span2 offset1">
+            <label class="control-label">
+              <strong>Pay Period:</strong>
+            </label>
+          </div>
+          <div class= "span9"> <label> <?php echo $account->getPayPeriod(); ?> </label> </div> 
+        </div>
+        <div class="row-fluid"> 
+          <div class="span2 offset1">
+            <label class="control-label">
+              <strong>Number Paid:</strong>
+            </label>
+          </div>
+          <div class= "span9"> <label> <?php echo $account->getNPaid(); ?> </label> </div> 
+        </div>
+        <div class="row-fluid"> 
+          <div class="span2 offset1">
+            <label class="control-label">
+              <strong>Status:</strong>
+            </label>
+          </div>
+          <div class= "span9"> <label> <?php echo $account->getStatus(); ?> </label> </div> 
+        </div>
       </div>    
 
       <!-- Payments Tab Section -->
 
-      <div class='tab-pane' id='account_payments'>
-        <form action="/payments/Payment/add" method="post">
-          <input type="hidden" name="accountId" value="<?php echo $account->getAccountId(); ?>"/>
-          <input type="submit" class='btn' value="Hacer Un Pago"/>
-        </form>
+      <div class='tab-pane active' id='account_payments'>
+        <?php 
+          if ($account->getStatus() == \Account\Entity\Account::OPEN) {
+            echo '<form action="/accounts/Account/pay" method="post">
+            <input type="hidden" name="accountId" value="' . $account->getAccountId() . '"/>
+            <input type="submit" class="btn" value="Hacer Un Pago"/>
+          </form>';
+          }
+        ?>
         <table class='table'> 
           <thead>
             <tr>
@@ -80,10 +115,11 @@ $paymentAttrs = array(
             foreach($payments as $tmp_payment) {
               echo "<tr>";
               ?>
-              <td><a href="<?php echo $this->url('payments/Payment', array('action'=>'show', 'paymentId' => $tmp_payment->getPaymentId() ));?>"> <?php echo $tmp_payment->getAmount(); ?> </a></td>
-              <td><a href="<?php echo $this->url('payments/Payment', array('action'=>'show', 'paymentId' => $tmp_payment->getPaymentId() ));?>"> <?php echo $tmp_payment->getPaymentNumber(); ?> </a></td>
-              <td><a href="<?php echo $this->url('payments/Payment', array('action'=>'show', 'paymentId' => $tmp_payment->getPaymentId() ));?>"> <?php echo $tmp_payment->getTimeStamp()->format('Y-m-d h:i:s'); ?> </a></td>
-              <td><a href="<?php echo $this->url('payments/Payment', array('action'=>'show', 'paymentId' => $tmp_payment->getPaymentId() ));?>"> <?php echo $tmp_payment->getStatus(); ?> </a></td>
+              <td><?php echo $tmp_payment->getAmount(); ?></td>
+              <td><?php echo $tmp_payment->getPaymentNumber(); ?></td>
+              <td><?php echo $tmp_payment->getDueDateStr(); ?></td>
+              <td><?php echo $tmp_payment->getPaidTimeStampStr(); ?></td>
+              <td><?php echo $tmp_payment->getStatus(); ?></td>
               <?php
               echo "</tr>";
             }

@@ -4,7 +4,7 @@
 		array_push($accounts, $account);
 	}
 
-    $attrs = array("Amount", "Start Week", "First Name", "Last Name");
+    $attrs = array("Amount", "Start Week", "First Name", "Last Name", "status");
 
 ?>
 
@@ -24,9 +24,10 @@
       	echo "<tr>";
     ?>
     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getAmount(); ?> </a></td>
-    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getStartWeek(); ?> </a></td>
+    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getFirstPayDateStr(); ?> </a></td>
     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo ucfirst($tmp_account->getClient()->getFirstName()); ?> </a></td>
     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo ucfirst($tmp_account->getClient()->getLastName()); ?> </a></td>
+    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo ucfirst($tmp_account->getStatus()); ?> </a></td>
     <?php
     	echo "</tr>";
     }

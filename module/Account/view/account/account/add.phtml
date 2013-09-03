@@ -6,11 +6,9 @@
     $form->setAttribute('class', 'form-horizontal');
 
     $fields = array(
-        'startWeek',
+        'firstPayDate',
         'amount', 
         'nPayments',
-        'nPaid',
-        'status',
     );
 
 ?>
@@ -22,8 +20,18 @@
         echo $this->formRow($form->get($field));
     }
 ?>
+
+<label>
+    <label class="control-label"><strong>Pay Period:</strong></label>
+    <select name="payPeriod">
+        <option value="<?php echo \Account\Entity\Account::WEEKLY; ?>"><?php echo \Account\Entity\Account::WEEKLY; ?></option>
+    </select>
+</label>
+
 <div class='form-actions'>
     <input type='hidden' name="clientId" value="<?php echo $this->clientId; ?>" />
+    <input type='hidden' name="nPaid" value="0" />
+    <input type='hidden' name="status" value="<?php echo \Account\Entity\Account::OPEN; ?>" />
     <button type='submit' name="addAccountSubmit" value="submit" class='btn btn-primary'> Add </button>
 </div> 
 <?php
@@ -43,5 +51,6 @@ $("div label").each(function() {
 });
 
 $('input').wrap('<div class="controls" />');
+$('select').wrap('<div class="controls" />');
 
 </script>

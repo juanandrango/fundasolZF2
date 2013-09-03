@@ -60,9 +60,9 @@ return array(
     ),
     'view_manager' => array(
         'template_map' => array(
-            'payment/payment/showAll'     => __DIR__ . '/../view/payment/payment/show-all.phtml',
-            'payment/payment/show'        => __DIR__ . '/../view/payment/payment/show.phtml',
-            'payment/payment/edit'        => __DIR__ . '/../view/payment/payment/show.phtml',
+            //'payment/payment/showAll'     => __DIR__ . '/../view/payment/payment/show-all.phtml',
+            //'payment/payment/show'        => __DIR__ . '/../view/payment/payment/show.phtml',
+            //'payment/payment/edit'        => __DIR__ . '/../view/payment/payment/show.phtml',
         ),
         'template_path_stack' => array(
             __DIR__ . '/../view',

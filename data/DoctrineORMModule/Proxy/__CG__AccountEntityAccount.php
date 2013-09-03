@@ -42,6 +42,30 @@ class Account extends \Account\Entity\Account implements \Doctrine\ORM\Proxy\Pro
     }
 
     
+    public function initAdd()
+    {
+        $this->__load();
+        return parent::initAdd();
+    }
+
+    public function generatePayments()
+    {
+        $this->__load();
+        return parent::generatePayments();
+    }
+
+    public function getNextDuePayment()
+    {
+        $this->__load();
+        return parent::getNextDuePayment();
+    }
+
+    public function getFirstPayDateStr()
+    {
+        $this->__load();
+        return parent::getFirstPayDateStr();
+    }
+
     public function getAccountId()
     {
         if ($this->__isInitialized__ === false) {
@@ -51,10 +75,16 @@ class Account extends \Account\Entity\Account implements \Doctrine\ORM\Proxy\Pro
         return parent::getAccountId();
     }
 
-    public function getStartWeek()
+    public function getFirstPayDate()
     {
         $this->__load();
-        return parent::getStartWeek();
+        return parent::getFirstPayDate();
+    }
+
+    public function getPayPeriod()
+    {
+        $this->__load();
+        return parent::getPayPeriod();
     }
 
     public function getAmount()
@@ -99,10 +129,16 @@ class Account extends \Account\Entity\Account implements \Doctrine\ORM\Proxy\Pro
         return parent::getTimeStamp();
     }
 
-    public function setStartWeek($sw)
+    public function setFirstPayDate($fpd)
     {
         $this->__load();
-        return parent::setStartWeek($sw);
+        return parent::setFirstPayDate($fpd);
+    }
+
+    public function setPayPeriod($pp)
+    {
+        $this->__load();
+        return parent::setPayPeriod($pp);
     }
 
     public function setAmount($newAmount)
@@ -150,7 +186,7 @@ class Account extends \Account\Entity\Account implements \Doctrine\ORM\Proxy\Pro
 
     public function __sleep()
     {
-        return array('__isInitialized__', 'accountId', 'startWeek', 'amount', 'nPayments', 'nPaid', 'status', 'timeStamp', 'payments', 'client');
+        return array('__isInitialized__', 'accountId', 'firstPayDate', 'payPeriod', 'amount', 'nPayments', 'nPaid', 'status', 'timeStamp', 'payments', 'client');
     }
 
     public function __clone()
