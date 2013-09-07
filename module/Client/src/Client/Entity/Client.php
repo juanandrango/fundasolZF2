@@ -4,6 +4,14 @@ use Doctrine\ORM\Mapping as ORM;
 use Zend\Form\Annotation;
 
 /** 
+* Client Entity holds client's information, using an ID for internal purposes only and their
+* state ID as a unique value. 
+*
+* A Client object creates accounts of type Account. Then he makes payment against that account. He
+* is also able to delete account info (which will remove payment information with them) only once the 
+* account has been paid off.  
+*
+*
 * @ORM\Entity 
 * @Annotation\Name("Client")
 * @Annotation\Hydrator({"type":"Zend\Stdlib\Hydrator\ClassMethods", "options": {"underscoreSeparatedKeys": false}})

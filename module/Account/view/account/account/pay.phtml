@@ -1,11 +1,11 @@
 <h2> New Payment </h2>
 
 <form action="/accounts/Account/pay" method="post" name="Payment" class="form-horizontal" id="Payment">
-    <label><span>Amount:</span><input name="amount" type="text" value="<?php echo $this->amount; ?>"></label>
+    <label><span>Amount</span><input name="amount" type="text" value="<?php echo $this->amount; ?>"></label>
     <div class='form-actions'>
         <input type='hidden' name="accountId" value="<?php echo $this->accountId; ?>" />
         <button type='submit' name="paySubmit" value="submit" class='btn btn-primary'> Make Payment </button>
-        <button href="#" id="editPaySubmit" class='btn'> Edit Amount </button>
+        <!-- <button href="#" id="editPaySubmit" class='btn'> Edit Amount </button> -->
     </div> 
 </form>
 

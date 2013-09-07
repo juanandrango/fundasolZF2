@@ -1,11 +1,6 @@
 <?php	
-	$accounts = array();
-	foreach($this->allAccounts as $account) {
-		array_push($accounts, $account);
-	}
-
-    $attrs = array("Amount", "Start Week", "First Name", "Last Name", "status");
-
+	$accounts = $this->allAccounts;
+  $attrs = array("Amount", "Start Week", "First Name", "Last Name", "status");
 ?>
 
 <table class='table'> 

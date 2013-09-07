@@ -1,11 +1,4 @@
 <?php
-/**
- * Zend Framework (http://framework.zend.com/)
- *
- * @link      http://github.com/zendframework/ZendSkeletonApplication for the canonical source repository
- * @copyright Copyright (c) 2005-2013 Zend Technologies USA Inc. (http://www.zend.com)
- * @license   http://framework.zend.com/license/new-bsd New BSD License
- */
 
 return array(
     'doctrine' => array(
@@ -56,16 +49,6 @@ return array(
     'controllers' => array(
         'invokables' => array(
             'Payment\Controller\Payment' => 'Payment\Controller\PaymentController'
-        ),
-    ),
-    'view_manager' => array(
-        'template_map' => array(
-            //'payment/payment/showAll'     => __DIR__ . '/../view/payment/payment/show-all.phtml',
-            //'payment/payment/show'        => __DIR__ . '/../view/payment/payment/show.phtml',
-            //'payment/payment/edit'        => __DIR__ . '/../view/payment/payment/show.phtml',
-        ),
-        'template_path_stack' => array(
-            __DIR__ . '/../view',
         ),
     ),
     'translator' => array(

@@ -14,8 +14,6 @@ use Zend\Form\Annotation;
 * An Account will create Payment Objects and is the only interface to create and destroy objects 
 * of type Payment from the database. 
 * 
-* An Account firstPayDate can be modified only if payments haven't been done against the account.
-*
 * The nPaid field keeps track of how many payments have been done so far. It should return the 
 * number of payments with status ONTIME and/or LATE
 * 
@@ -139,7 +137,6 @@ class Account {
     }
 
     /**
-    * It gets called in the deleteAction function from the controller. 
     *
     * This function removes a close account from its client's list and all its respective
     * payment objects
@@ -164,7 +161,7 @@ class Account {
     * 
     * @param Service $objectManager The Entity Manager
     */
-    public function generatePayments($objectManager) {
+    private function generatePayments($objectManager) {
         for ($i = 0 ; $i < $this->nPayments ; $i++) {
             $payment = new \Payment\Entity\Payment;
             $payment->setAmount(number_format($this->amount/$this->nPayments, 2, '.', '') + "");
@@ -188,13 +185,16 @@ class Account {
     */    
     private function removePayments($objectManager) {
         foreach($this->getPayments as $payment) {
-            if ($payment->getStatus() == \Payment\Entity\Payment::ONTIME
-                || $payment->getStatus() == \Payment\Entity\Payment::ONTIME) {
-                $objectManager->remove($payment);    
-            } else {
+            if ($payment->getStatus() != \Payment\Entity\Payment::ONTIME
+                && $payment->getStatus() != \Payment\Entity\Payment::LATE) {
                 return false;
             }
         }
+
+        foreach($this->getPayments as $payment) {
+            $objectManager->remove($payment);    
+        }
+
         return true;
     }
 
@@ -214,23 +214,42 @@ class Account {
 
     /**
     * Performs a Legal payment against the account. Marks the account as close if 
-    * no more payments are due.  
+    * no more payments are due. If account is close, it doesn't do anything
     *
     * @param Service $objectManager The entity Manager
     * @param Payment $payment The next due payment from Account
     */
     public function processNextDuePayment($objectManager, $payment) {
-        $this->setNPaid($payment->getPaymentNumber());
-        if ($this->getNPaid() == $this->getNPayments()) {
-            $this->setStatus(Account::CLOSE);
+        if ($this->getStatus() != Account::CLOSE) {
+            $this->setNPaid($payment->getPaymentNumber());
+            if ($this->getNPaid() == $this->getNPayments()) {
+                $this->setStatus(Account::CLOSE);
+            }
+            $payment->processPay();
+            $objectManager->persist($payment);
+            $objectManager->persist($this);    
         }
-        $payment->processPay();
-        $objectManager->persist($payment);
-        $objectManager->persist($this);
     }
 
     public function getFirstPayDateStr() {
         return $this->firstPayDate->format('Y-m-d');
+    }
+
+    /**
+    * @return string An HTML formatted string to show reporting details about the account
+    */
+    public function getHTMLReport() {
+        $HTMLReport = "<dl class='dl-horizontal' >" . PHP_EOL;
+        $HTMLReport .= "<dt> Completed </dt> <dd>" . (int)(($this->getNPaid()/$this->getNPayments()) * 100) . "% </dd>" . PHP_EOL;
+        $latePayments = 0;
+        foreach($this->getPayments() as $payment) {
+            if ($payment->getStatus() == \Payment\Entity\Payment::LATE) {
+                $latePayments ++;
+            }
+        }
+        $HTMLReport .= "<dt> Late Payments </dt> <dd>" . $latePayments . "/" . $this->getNPaid() . "</dd>" . PHP_EOL;
+        $HTMLReport .= "</dl>";
+        return $HTMLReport;
     }
     
     //END BUSINESS LOGIC ************************************************************

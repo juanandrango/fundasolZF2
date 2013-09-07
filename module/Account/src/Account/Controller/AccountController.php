@@ -1,7 +1,4 @@
 <?php
-/**
- *
- */
 
 namespace Account\Controller;
 
@@ -52,38 +49,12 @@ class AccountController extends AbstractActionController {
             $form->setBindOnValidate(false);
             $form->bind($account);
             return new ViewModel( array(
-                'account' => $account, 
-                'form' => $form
+                'account' => $account
                 ) 
             );
         }
         $this->redirect()->toRoute('home'); 
     }
-
-    // public function editAction() {
-    //     if ($this->getRequest()->isPost()) {
-    //         $this->objectManager = $this->getObjectManager();            
-    //         $accountId = (int)$this->getRequest()->getPost('accountId');            
-    //         if ($accountId != null) {
-    //             $account = $this->getAccountRepository()->findOneBy(array("accountId" => $accountId));
-    //             $builder = new AnnotationBuilder($this->objectManager);
-    //             $form = $builder->createForm($account);
-    //             $form->setHydrator(new DoctrineHydrator($this->objectManager,'Account\Entity\Account'));
-    //             $form->bind($account);
-    //             $form->setData($this->getRequest()->getPost());
-    //             if ($form->isValid()) {
-    //                 $this->objectManager->flush();
-    //             }
-    //             return new ViewModel( array(
-    //                 'account'   => $account, 
-    //                 'form'      => $form,
-    //                 'accountId' => $accountId,
-    //                 ) 
-    //             );    
-    //         }                  
-    //     }
-    //     $this->redirect()->toRoute('home');
-    // }
 
     public function addAction() {
         if($this->getRequest()->isPost()) {
@@ -128,39 +99,6 @@ class AccountController extends AbstractActionController {
         return $this->redirect()->toRoute('home');
     }
     
-    public function deleteAction() {
-        if ($this->getRequest()->isPost()) {
-            $accountId = $this->getRequest()->getPost('accountId');    
-            if ($this->getRequest()->getPost('sureDelete') == 'yes') {
-                $this->objectManager = $this->getObjectManager();
-                $account = $this->getAccountRepository()->findOneBy(array("accountId" => $accountId));
-                if ($account != null) {
-                    if ($account->initDelete($this->objectManager)) {
-                        $this->objectManager->remove($account);
-                        $this->objectManager->flush();
-                        $this->redirect()->toRoute('accounts/Account', 
-                            array(
-                                'action' => 'showAll',
-                            )
-                        );    
-                    } else {
-                        //Something went wrong!. Account is not close or payments were not all Paid
-                        //TODO Handle this situation 
-                        return $this->redirect()->toRoute('home');
-                    }                    
-                } 
-                //No Account found
-            } else if ($this->getRequest()->getPost('sureDelete') == 'no') {
-                 return $this->redirect()->toRoute('accounts/Account', 
-                    array(
-                        'action' => 'show',
-                        'accountId' => $accountId, 
-                    )
-                );
-            } 
-        }
-        return $this->redirect()->toRoute('home');
-    }
     public function payAction() {
         $this->objectManager = $this->getObjectManager();
         if($this->getRequest()->isPost()) {
