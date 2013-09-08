@@ -65,7 +65,13 @@ $paymentAttrs = array(
           <tbody>
             <?php
             foreach($payments as $tmp_payment) {
-              echo "<tr>";
+              if ($tmp_payment->getStatus() == \Payment\Entity\Payment::ONTIME) {
+                echo "<tr class='success'>";
+              } else if ($tmp_payment->getStatus() == \Payment\Entity\Payment::LATE) {
+                echo "<tr class='warning'>";
+              } else {
+                echo "<tr>";
+              }
               ?>
               <td><?php echo $tmp_payment->getAmount(); ?></td>
               <td><?php echo $tmp_payment->getPaymentNumber(); ?></td>

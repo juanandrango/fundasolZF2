@@ -42,16 +42,16 @@ class Account extends \Account\Entity\Account implements \Doctrine\ORM\Proxy\Pro
     }
 
     
-    public function initAdd()
+    public function initAdd($objectManager)
     {
         $this->__load();
-        return parent::initAdd();
+        return parent::initAdd($objectManager);
     }
 
-    public function generatePayments()
+    public function initDelete($objectManager)
     {
         $this->__load();
-        return parent::generatePayments();
+        return parent::initDelete($objectManager);
     }
 
     public function getNextDuePayment()
@@ -60,10 +60,22 @@ class Account extends \Account\Entity\Account implements \Doctrine\ORM\Proxy\Pro
         return parent::getNextDuePayment();
     }
 
+    public function processNextDuePayment($objectManager, $payment)
+    {
+        $this->__load();
+        return parent::processNextDuePayment($objectManager, $payment);
+    }
+
     public function getFirstPayDateStr()
     {
         $this->__load();
         return parent::getFirstPayDateStr();
+    }
+
+    public function getHTMLReport()
+    {
+        $this->__load();
+        return parent::getHTMLReport();
     }
 
     public function getAccountId()

@@ -26,8 +26,18 @@ class ClientController extends AbstractActionController {
     private function getClientRepository() {
         return $this->objectManager->getRepository('Client\Entity\Client');
     }
+    private function getAccountRepository() {
+        return $this->objectManager->getRepository('Account\Entity\Account');
+    }
+
+    private function updateCounts() {
+        $this->objectManager = $this->getObjectManager();
+        \Client\Entity\Client::$count = count($this->getClientRepository()->findAll());
+        \Account\Entity\Account::$count = count($this->getAccountRepository()->findAll());
+    }
 
     public function showAllAction() {
+        $this->updateCounts();
         $this->objectManager = $this->getObjectManager();
         return new ViewModel( array(
             'allClients' => $this->getClientRepository()->findAll()
@@ -36,6 +46,7 @@ class ClientController extends AbstractActionController {
     }
 
     public function showAction() {
+        $this->updateCounts();
         if ($this->params()->fromRoute('clientId', 0) != "") {
             $this->objectManager = $this->getObjectManager();        
             $clientId = (int)$this->params()->fromRoute('clientId', 0);
@@ -57,6 +68,7 @@ class ClientController extends AbstractActionController {
     }
     
     public function editAction() {
+        $this->updateCounts();
         if ($this->getRequest()->isPost()) {
             $this->objectManager = $this->getObjectManager();        
             $stateId = (int)$this->getRequest()->getPost('clientId');            
@@ -83,6 +95,7 @@ class ClientController extends AbstractActionController {
     }
 
     public function addAction() {
+        $this->updateCounts();
         $this->objectManager = $this->getObjectManager();        
         $builder = new AnnotationBuilder($this->objectManager);
         $form = $builder->createForm(new \Client\Entity\Client);
@@ -114,6 +127,7 @@ class ClientController extends AbstractActionController {
     }
 
     public function deleteAction() {
+        $this->updateCounts();
         $clientId = $this->getRequest()->getPost('clientId');
         if ($this->getRequest()->getPost('sureDelete') == 'yes') {
             $this->objectManager = $this->getObjectManager();        

@@ -39,7 +39,6 @@
 ?>
 
 <script>
-
 $("label span").each(function() {
     var $this = $(this);
     $this.replaceWith($("<label class='control-label'><strong>" + $this.html() + "</strong></label>"));
@@ -53,4 +52,12 @@ $("div label").each(function() {
 $('input').wrap('<div class="controls" />');
 $('select').wrap('<div class="controls" />');
 
+$('input[name="firstPayDate"]').datepicker({ 
+    dateFormat: 'yy-mm-dd' , 
+    minDate: 0,
+    beforeShowDay: function(date) {
+        var day = date.getDay();
+        return [(day != 0 && day != 6), ''];
+    }
+});
 </script>

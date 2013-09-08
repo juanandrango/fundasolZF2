@@ -1,10 +1,7 @@
 <?php	
-	$clients = array();
-	foreach($this->allClients as $client) {
-		array_push($clients, $client);
-	}
+	$clients = $this->allClients;
 
-    $attrs = array("clientId", "First Name", "Last Name");
+    $attrs = array("clientId", "First Name", "Last Name", "Accounts");
 
 ?>
 
@@ -26,6 +23,7 @@
     <td><a href="<?php echo $this->url('clients/Client', array('action'=>'show', 'clientId' => $tmp_client->getClientId() ));?>"> <?php echo $tmp_client->getClientId(); ?> </a></td>
     <td><a href="<?php echo $this->url('clients/Client', array('action'=>'show', 'clientId' => $tmp_client->getClientId() ));?>"> <?php echo ucfirst($tmp_client->getFirstName()); ?> </a></td>
     <td><a href="<?php echo $this->url('clients/Client', array('action'=>'show', 'clientId' => $tmp_client->getClientId() ));?>"> <?php echo ucfirst($tmp_client->getLastName()); ?> </a></td>
+    <td><a href="<?php echo $this->url('clients/Client', array('action'=>'show', 'clientId' => $tmp_client->getClientId() ));?>"> <?php echo $tmp_client->getAccounts()->count(); ?> </a></td>
     
     <?php
     	echo "</tr>";

@@ -113,6 +113,10 @@ class Client {
     */
     protected $timeStamp;
 
+    // =========================================================================
+
+    public static $count;
+
 	// public function __get($property) {
 	// 	return (isset($this->{$property}) ? $this->{$property} : null);
 	// }

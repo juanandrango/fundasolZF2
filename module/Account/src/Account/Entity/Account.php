@@ -117,6 +117,8 @@ class Account {
 
     //BUSINESS LOGIC *************************************************************
 
+    public static $count;
+
     public function __construct() {
         $this->payments = new \Doctrine\Common\Collections\ArrayCollection();
     }

@@ -30,7 +30,15 @@ class AccountController extends AbstractActionController {
         return $this->objectManager->getRepository('Account\Entity\Account');
     }
 
+
+    private function updateCounts() {
+        $this->objectManager = $this->getObjectManager();
+        \Client\Entity\Client::$count = count($this->getClientRepository()->findAll());
+        \Account\Entity\Account::$count = count($this->getAccountRepository()->findAll());
+    }
+
     public function showAllAction() {
+        $this->updateCounts();
         $this->objectManager = $this->getObjectManager();
         return new ViewModel( array(
             'allAccounts' => $this->getAccountRepository()->findAll() 
@@ -39,6 +47,7 @@ class AccountController extends AbstractActionController {
     }
 
     public function showAction() {
+        $this->updateCounts();
         if ($this->params()->fromRoute('accountId', 0) != "") {
             $this->objectManager = $this->getObjectManager();
             $accountId = $this->params()->fromRoute('accountId', 0);
@@ -57,6 +66,7 @@ class AccountController extends AbstractActionController {
     }
 
     public function addAction() {
+        $this->updateCounts();    
         if($this->getRequest()->isPost()) {
             $this->objectManager = $this->getObjectManager();            
             $builder = new AnnotationBuilder($this->objectManager);
@@ -100,6 +110,7 @@ class AccountController extends AbstractActionController {
     }
     
     public function payAction() {
+        $this->updateCounts();
         $this->objectManager = $this->getObjectManager();
         if($this->getRequest()->isPost()) {
             $accountId = (int)$this->getRequest()->getPost('accountId');

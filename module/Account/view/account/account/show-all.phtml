@@ -1,7 +1,7 @@
 <?php	
 	$accounts = $this->allAccounts;
   $attrs = array("Amount", "Start Week", "First Name", "Last Name", "status");
-?>
+  ?>
 
 <table class='table'> 
   <thead>
@@ -16,7 +16,11 @@
   <tbody>
     <?php
     foreach($accounts as $tmp_account) {
-      	echo "<tr>";
+      	if ($tmp_account->getStatus() == \Account\Entity\Account::OPEN) {
+          echo "<tr class='success'>";
+        } else {
+          echo "<tr>";
+        }
     ?>
     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getAmount(); ?> </a></td>
     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getFirstPayDateStr(); ?> </a></td>
