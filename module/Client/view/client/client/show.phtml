@@ -58,9 +58,9 @@
         </div>    
 
         <div class='tab-pane' id='client_accounts'>
-            <form action="/accounts/Account/add" method="post">
+            <form action="/accounts/Account/request" method="post">
                 <input type="hidden" name="clientId" value="<?php echo $client->getClientId(); ?>"/>
-                <input type="submit" class='btn' value="Create Cuenta" formaction="/accounts/Account/add" />
+                <input type="submit" class='btn' value="Create Cuenta" formaction="/accounts/Account/request" />
             </form>
             <table class='table'> 
                 <thead>

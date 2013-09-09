@@ -1,11 +1,12 @@
 <?php
     $form = $this->form;
     $form->prepare();
-    $form->setAttribute('action', 'add');
+    $form->setAttribute('action', 'request');
     $form->setAttribute('method', 'post');
     $form->setAttribute('class', 'form-horizontal');
 
     $fields = array(
+        'requestDate',
         'firstPayDate',
         'amount', 
         'nPayments',
@@ -13,7 +14,7 @@
 
 ?>
 
-<h2> Add new Account </h2>
+<h2> Request new Account </h2>
 <?php
     echo $this->form()->openTag($form);
     foreach($fields as $field) {
@@ -31,8 +32,8 @@
 <div class='form-actions'>
     <input type='hidden' name="clientId" value="<?php echo $this->clientId; ?>" />
     <input type='hidden' name="nPaid" value="0" />
-    <input type='hidden' name="status" value="<?php echo \Account\Entity\Account::OPEN; ?>" />
-    <button type='submit' name="addAccountSubmit" value="submit" class='btn btn-primary'> Add </button>
+    <input type='hidden' name="status" value="<?php echo \Account\Entity\Account::PENDING; ?>" />
+    <button type='submit' name="requestAccountSubmit" value="submit" class='btn btn-primary'> Submit Request </button>
 </div> 
 <?php
     echo $this->form()->closeTag($form);
@@ -53,6 +54,15 @@ $('input').wrap('<div class="controls" />');
 $('select').wrap('<div class="controls" />');
 
 $('input[name="firstPayDate"]').datepicker({ 
+    dateFormat: 'yy-mm-dd' , 
+    minDate: 0,
+    beforeShowDay: function(date) {
+        var day = date.getDay();
+        return [(day != 0 && day != 6), ''];
+    }
+});
+
+$('input[name="requestDate"]').datepicker({ 
     dateFormat: 'yy-mm-dd' , 
     minDate: 0,
     beforeShowDay: function(date) {

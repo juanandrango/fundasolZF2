@@ -1,0 +1,33 @@
+<?php	
+	$investors = $this->allInvestors;
+
+    $attrs = array("investorId", "First Name", "Last Name", "Contributions");
+
+?>
+
+<table class='table'> 
+  <thead>
+    <tr>
+      <?php
+      foreach($attrs as $key) {
+        echo "<th>" . $key . "</th>";
+      }
+      ?>
+    </tr>
+  </thead>
+  <tbody>
+    <?php
+    foreach($investors as $tmp_investor) {
+      	echo "<tr>";
+    ?>
+    <td><a href="<?php echo $this->url('investors/Investor', array('action'=>'show', 'investorId' => $tmp_investor->getInvestorId() ));?>"> <?php echo $tmp_investor->getInvestorId(); ?> </a></td>
+    <td><a href="<?php echo $this->url('investors/Investor', array('action'=>'show', 'investorId' => $tmp_investor->getInvestorId() ));?>"> <?php echo ucfirst($tmp_investor->getFirstName()); ?> </a></td>
+    <td><a href="<?php echo $this->url('investors/Investor', array('action'=>'show', 'investorId' => $tmp_investor->getInvestorId() ));?>"> <?php echo ucfirst($tmp_investor->getLastName()); ?> </a></td>
+    <td><a href="<?php echo $this->url('investors/Investor', array('action'=>'show', 'investorId' => $tmp_investor->getInvestorId() ));?>"> <?php echo $tmp_investor->getContributions()->count(); ?> </a></td>
+    
+    <?php
+    	echo "</tr>";
+    }
+    ?>
+  </tbody>
+</table>

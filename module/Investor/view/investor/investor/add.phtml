@@ -1,0 +1,43 @@
+<?php
+    $form = $this->form;
+    $form->prepare();
+    $form->setAttribute('action', 'add');
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('class', 'form-horizontal');
+
+    $fields = array(
+        "firstName", 
+        "lastName", 
+        "stateId", 
+    );
+?>
+
+<h2> Add new Investor </h2>
+<?php
+    echo $this->form()->openTag($form);
+    foreach($fields as $field) {
+        echo $this->formRow($form->get($field));
+    }
+?>
+<div class='form-actions'>
+    <button type='submit' class='btn btn-primary'> Add </button>
+</div> 
+<?php
+    echo $this->form()->closeTag($form);
+?>
+
+<script>
+
+$("label span").each(function() {
+    var $this = $(this);
+    $this.replaceWith($("<label class='control-label'><strong>" + $this.html() + "</strong></label>"));
+});
+
+$("div label").each(function() {
+    var $this = $(this);
+    $this.replaceWith($("<div class='control-group'>" + $this.html() + "</div>"));
+});
+
+$('input').wrap('<div class="controls" />');
+
+</script>

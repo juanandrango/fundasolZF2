@@ -13,6 +13,12 @@ $paymentAttrs = array(
   'Status'
   );
 
+$isPending = false;
+if ($account->getStatus() == \Account\Entity\Account::PENDING) {
+  $isPending = true;
+}
+
+
 ?>
 
   <h2> Account <?php echo $account->getAccountId(); ?> <small> <?php echo ucwords($client_html); ?></small> </h2>
@@ -20,14 +26,15 @@ $paymentAttrs = array(
   <div class='tabbable'>
     
     <ul class='nav nav-tabs'>
-      <li class='active'><a href='#account_payments' data-toggle='tab'>Payments</a></li>
-      <li><a href='#account_info' data-toggle='tab'> Informacion</a></li>
+      <li class="<?php if (!$isPending) { echo 'active'; } else { echo 'hidden'; } ?>"><a href='#account_payments' data-toggle='tab'>Payments</a></li>
+      <li class="<?php if ($isPending) { echo 'active'; } ?>"><a href='#account_info' data-toggle='tab'> Informacion</a></li>
     </ul>
     <div class='tab-content'>
-      <div class='tab-pane' id='account_info'>
+      <div class="tab-pane <?php if ($isPending) { echo 'active'; } ?>" id='account_info'>
         <div class="row-fluid">
           <div class="span6">
             <dl class='dl-horizontal'>
+              <dt> Needed By      </dt> <dd> <?php echo $account->getRequestDate(); ?> </dd>
               <dt> Payments Start </dt> <dd> <?php echo $account->getFirstPayDate(); ?> </dd>
               <dt> Amount         </dt> <dd> <?php echo $account->getAmount(); ?> </dd>
               <dt> Number Paid    </dt> <dd> <?php echo $account->getNPaid(); ?> / <?php echo $account->getNPayments(); ?> </dd>
@@ -40,8 +47,23 @@ $paymentAttrs = array(
             <?php echo $account->getHTMLReport(); ?>
           </div>
         </div>
+        <?php
+          if ($isPending) {
+        ?>
+
+        <form action="/accounts/Account/approve" method="post">
+          <div class="form-actions">
+            <input type="hidden" name="accountId" value="<?php echo $account->getAccountId(); ?>" />
+            <button class="btn btn-primary" type="submit">Approve</button>
+            <button class="btn btn-danger" type="submit" formaction="/accounts/Account/deny">Deny</button>
+          </div>
+        </form>
+
+        <?php
+          }
+        ?>
       </div>
-      <div class='tab-pane active' id='account_payments'>
+      <div class="tab-pane <?php if (!$isPending) { echo 'active'; } else { echo 'hidden';} ?>" id='account_payments'>
         <?php 
         if ($account->getStatus() == \Account\Entity\Account::OPEN) {
           echo '<form action="/accounts/Account/pay" method="post">' . PHP_EOL 

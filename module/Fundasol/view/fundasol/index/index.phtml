@@ -2,16 +2,16 @@
 
 $payments = $this->payments;
 
-$startDate = \date("2013-09-07");
-$endDate = \date("2013-09-07");
+$startDate = \date("2013-09-08");
+$endDate = \date("2013-09-13");
 
 
 $amountDueByE = \Fundasol\Model\Fundasol::amountExpected($payments, $startDate, $endDate);
 $amountDueByR = \Fundasol\Model\Fundasol::amountReality($payments, $startDate, $endDate);
 $amountCollected = \Fundasol\Model\Fundasol::amountCollected($payments, $startDate, $endDate);
-$amountOnTransit = \Fundasol\Model\Fundasol::amountOnTransit($payments, $startDate, $endDate);
-$amountAvailable = \Fundasol\Model\Fundasol::amountAvailable($payments, $startDate, $endDate);
-$amountTotal = \Fundasol\Model\Fundasol::amountTotal($payments, $startDate, $endDate)
+$amountOnTransit = \Fundasol\Model\Fundasol::amountOnTransit($payments);
+$amountAvailable = \Fundasol\Model\Fundasol::amountAvailable($contributions, $payments);
+$amountTotal = \Fundasol\Model\Fundasol::amountTotal($contributions);
 
 ?>
 
@@ -24,7 +24,7 @@ $amountTotal = \Fundasol\Model\Fundasol::amountTotal($payments, $startDate, $end
     <dt>Collected</dt><dd><?php echo $amountCollected . PHP_EOL; ?></dd>
     <dt>On Transit</dt><dd><?php echo $amountOnTransit . PHP_EOL; ?></dd>
     <dt>Available</dt><dd><?php echo $amountAvailable . PHP_EOL; ?></dd>
-    <dt>TOTAL</dt><dd><h3><?php echo $amountTotal . PHP_EOL; ?></h3></dd>
+    <dt>TOTAL</dt><dd><?php echo $amountTotal . PHP_EOL; ?></dd>
 </dl>
 
 

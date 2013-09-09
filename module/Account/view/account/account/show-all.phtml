@@ -1,6 +1,6 @@
 <?php	
 	$accounts = $this->allAccounts;
-  $attrs = array("Amount", "Start Week", "First Name", "Last Name", "status");
+  $attrs = array("Amount", "Needed By", "Start Week", "First Name", "Last Name", "status");
   ?>
 
 <table class='table'> 
@@ -16,13 +16,21 @@
   <tbody>
     <?php
     foreach($accounts as $tmp_account) {
-      	if ($tmp_account->getStatus() == \Account\Entity\Account::OPEN) {
+      	
+        if ($tmp_account->getStatus() == \Account\Entity\Account::PENDING) {
+          continue;
+        }
+
+        if ($tmp_account->getStatus() == \Account\Entity\Account::OPEN) {
           echo "<tr class='success'>";
+        } else if ($tmp_account->getStatus() == \Account\Entity\Account::DENY) {
+          echo "<tr class='error'>";
         } else {
           echo "<tr>";
         }
     ?>
     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getAmount(); ?> </a></td>
+    <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getRequestDateStr(); ?> </a></td>
     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo $tmp_account->getFirstPayDateStr(); ?> </a></td>
     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo ucfirst($tmp_account->getClient()->getFirstName()); ?> </a></td>
     <td><a href="<?php echo $this->url('accounts/Account', array('action'=>'show', 'accountId' => $tmp_account->getAccountId() ));?>"> <?php echo ucfirst($tmp_account->getClient()->getLastName()); ?> </a></td>

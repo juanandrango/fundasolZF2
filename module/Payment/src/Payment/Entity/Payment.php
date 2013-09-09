@@ -92,6 +92,7 @@ class Payment {
     const LATE = 'Late';
     const PARTIAL = 'Partial';
 
+    // ======================================================================================================
 
     /**
     * processPay records a payment. It sets the status to ONTIME if payment is made on the due

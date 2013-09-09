@@ -1,0 +1,106 @@
+<?php
+    $investor = $this->investor;
+    $contributions = $investor->getContributions();
+    $investor_html =  $investor->getLastName() . ", " . $investor->getFirstName();
+    $investor_status_html = "Pending";
+    $form = $this->form;
+    $form->prepare();
+    $form->setAttribute('action', '/investors/Investor/edit');
+    $form->setAttribute('method', 'post');
+    $form->setAttribute('class', 'form-horizontal');
+    $attrs = array(
+        'firstName', 
+        'lastName', 
+        'stateId',
+        'status', 
+        'phoneHome', 
+        'phoneWork',
+        'phoneReference',
+        'phoneCell',
+        'addressHome',
+        'addressWork',
+    );
+    $contributionAttrs = array(
+        'ID',
+        'Amount',
+        'Status'
+    );
+?>
+
+<h2> <?php echo ucwords($investor_html); ?> <small> <?php echo $investor_status_html;?></small> </h2>
+
+<div class='tabbable'>
+    <ul class='nav nav-tabs'>
+        <li class='active'><a href='#investor_info' data-toggle='tab'> Informacion</a></li>
+        <li><a href='#investor_contributions' data-toggle='tab'>Contribuciones</a></li>
+    </ul>
+
+    <div class='tab-content'>
+
+        <div class='tab-pane active' id='investor_info'>
+            <?php
+                echo $this->form()->openTag($form);
+                foreach ($attrs as $attr) {
+                    echo $this->formRow($form->get($attr));
+                }
+            ?>
+            <input type="hidden" name="investorId" value="<?php echo $investor->getInvestorId(); ?>"/>
+            <div class='form-actions'>
+                <button type='submit' class='btn btn-primary'> Actualizar </button>
+                <button type='submit' class='btn btn-danger' formaction="/investors/Investor/delete"> Delete </button>
+            </div> 
+            <?php
+                echo $this->form()->closeTag($form);
+            ?>
+        </div>    
+
+        <div class='tab-pane' id='investor_contributions'>
+            <form action="/contributions/Contribution/add" method="post">
+                <input type="hidden" name="investorId" value="<?php echo $investor->getInvestorId(); ?>"/>
+                <input type="submit" class='btn' value="Create Contribucion" formaction="/contributions/Contribution/add" />
+            </form>
+            <table class='table'> 
+                <thead>
+                    <tr>
+                        <?php
+                            if (count($contributions) !== 0) {
+                                foreach($contributionAttrs as $attr ) {
+                                    echo "<th>" . $attr . "</th>";
+                                }
+                            }
+                        ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                        foreach($contributions as $tmp_contribution) {
+                            echo "<tr>";
+                    ?>
+                    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() ));?>"> <?php echo $tmp_contribution->getContributionId(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() ));?>"> <?php echo $tmp_contribution->getAmount(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() ));?>"> <?php echo $tmp_contribution->getStatus(); ?> </a></td>
+                    <?php
+                            echo "</tr>";
+                        }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+
+$("label span").each(function() {
+    var $this = $(this);
+    $this.replaceWith($("<label class='control-label'><strong>" + $this.html() + "</strong></label>"));
+});
+
+$("div label").each(function() {
+    var $this = $(this);
+    $this.replaceWith($("<div class='control-group'>" + $this.html() + "</div>"));
+});
+
+$('input').wrap('<div class="controls" />');
+
+</script>

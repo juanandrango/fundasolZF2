@@ -26,18 +26,34 @@ class AccountController extends AbstractActionController {
     private function getClientRepository() {
         return $this->objectManager->getRepository('Client\Entity\Client');
     }
+    private function getContributionRepository() {
+        return $this->objectManager->getRepository('Contribution\Entity\Contribution');
+    }
     private function getAccountRepository() {
         return $this->objectManager->getRepository('Account\Entity\Account');
     }
-
+    private function getInvestorRepository() {
+        return $this->objectManager->getRepository('Investor\Entity\Investor');
+    }
 
     private function updateCounts() {
         $this->objectManager = $this->getObjectManager();
         \Client\Entity\Client::$count = count($this->getClientRepository()->findAll());
+        \Investor\Entity\Investor::$count = count($this->getInvestorRepository()->findAll());
         \Account\Entity\Account::$count = count($this->getAccountRepository()->findAll());
+        \Contribution\Entity\Contribution::$count = count($this->getContributionRepository()->findAll());
     }
 
     public function showAllAction() {
+        $this->updateCounts();
+        $this->objectManager = $this->getObjectManager();
+        return new ViewModel( array(
+            'allAccounts' => $this->getAccountRepository()->findAll() 
+            )
+        );
+    }
+
+    public function showRequestsAction() {
         $this->updateCounts();
         $this->objectManager = $this->getObjectManager();
         return new ViewModel( array(
@@ -51,12 +67,7 @@ class AccountController extends AbstractActionController {
         if ($this->params()->fromRoute('accountId', 0) != "") {
             $this->objectManager = $this->getObjectManager();
             $accountId = $this->params()->fromRoute('accountId', 0);
-            $account = $this->getAccountRepository()->findOneBy(array("accountId" => $accountId));    
-            $builder = new AnnotationBuilder($this->objectManager);
-            $form = $builder->createForm($account);
-            $form->setHydrator(new DoctrineHydrator($this->objectManager,'Account\Entity\Account'));
-            $form->setBindOnValidate(false);
-            $form->bind($account);
+            $account = $this->getAccountRepository()->findOneBy(array("accountId" => $accountId));
             return new ViewModel( array(
                 'account' => $account
                 ) 
@@ -65,7 +76,51 @@ class AccountController extends AbstractActionController {
         $this->redirect()->toRoute('home'); 
     }
 
-    public function addAction() {
+    public function approveAction() {
+        $this->updateCounts();
+        if ($this->getRequest()->isPost()) {
+            $this->objectManager = $this->getObjectManager();
+            $accountId = (int)$this->getRequest()->getPost('accountId');
+            if ($accountId != null) {
+                $account = $this->getAccountRepository()->findOneBy(array('accountId' => $accountId));
+                if ($account != null) {
+                    $account->approve($this->objectManager);
+                    $this->objectManager->flush();
+                    return $this->redirect()->toRoute('accounts/Account', 
+                        array(
+                            'action'    => 'show',
+                            'accountId'   => $account->getAccountId()
+                        )
+                    ); 
+                }
+            }            
+        }
+        return $this->redirect()->toRoute('home');
+    }
+
+    public function denyAction() {
+        $this->updateCounts();
+        if ($this->getRequest()->isPost()) {
+            $this->objectManager = $this->getObjectManager();
+            $accountId = (int)$this->getRequest()->getPost('accountId');
+            if ($accountId != null) {
+                $account = $this->getAccountRepository()->findOneBy(array('accountId' => $accountId));
+                if ($account != null) {
+                    $account->deny($this->objectManager);
+                    $this->objectManager->flush();
+                    return $this->redirect()->toRoute('accounts/Account', 
+                        array(
+                            'action'    => 'show',
+                            'accountId'   => $account->getAccountId()
+                        )
+                    ); 
+                }
+            }            
+        }
+        return $this->redirect()->toRoute('home');
+    }
+
+    public function requestAction() {
         $this->updateCounts();    
         if($this->getRequest()->isPost()) {
             $this->objectManager = $this->getObjectManager();            
@@ -78,14 +133,16 @@ class AccountController extends AbstractActionController {
                 if ($client != null) {
                     $account = new \Account\Entity\Account;
                     $form->bind($account);
-                    if ($this->getRequest()->getPost('addAccountSubmit') != null) {
+                    if ($this->getRequest()->getPost('requestAccountSubmit') != null) {
                         $form->setData($this->getRequest()->getPost());                                                
                         if ($form->isValid()) {
-                            if (\strtotime($account->getFirstPayDateStr()) < \strtotime(\date("Y-m-d"))) {
+                            if (\strtotime($account->getRequestDateStr()) < \strtotime(\date("Y-m-d"))) {
+                                $form->get("requestDate")->setMessages(array("Invalid Date"));
+                            } else if (\strtotime($account->getFirstPayDateStr()) < \strtotime($account->getRequestDateStr())) {
                                 $form->get("firstPayDate")->setMessages(array("Invalid Date"));
                             } else {
                                 $account->setClient($client);
-                                $account->initAdd($this->objectManager);                            
+                                $account->initRequest();                            
                                 $this->objectManager->persist($account);
                                 $client->getAccounts()->add($account);
                                 $this->objectManager->flush();                                              

@@ -7,6 +7,8 @@ return array(
         'Client',
         'Account',
         'Payment',
+        'Investor',
+        'Contribution',
         'ZendDeveloperTools',
         'DoctrineModule',
         'DoctrineORMModule'

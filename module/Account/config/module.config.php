@@ -52,8 +52,9 @@ return array(
     ),
     'view_manager' => array(
         'template_map' => array(
-            'account/account/showAll'     => __DIR__ . '/../view/account/account/show-all.phtml',
-            'account/account/show'        => __DIR__ . '/../view/account/account/show.phtml',
+            'account/account/showAll'       => __DIR__ . '/../view/account/account/show-all.phtml',
+            'account/account/showRequests'  => __DIR__ . '/../view/account/account/show-requests.phtml',
+            'account/account/show'          => __DIR__ . '/../view/account/account/show.phtml',
         ),
         'template_path_stack' => array(
             __DIR__ . '/../view',

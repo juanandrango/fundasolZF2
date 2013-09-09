@@ -34,6 +34,15 @@ class Account {
     */
     protected $accountId;
 
+
+    /**
+    * @ORM\Column(type="date", nullable = false)
+    * @Annotation\Attributes({"type":"datetime"})
+    * @Annotation\Options({"label":"Needed by:"})
+    * @Annotation\Filter({"name": "StringTrim"})
+    */
+    protected $requestDate;
+
     /**
     * @ORM\Column(type="date", nullable = false)
     * @Annotation\Attributes({"type":"datetime"})
@@ -97,7 +106,7 @@ class Account {
     * @ORM\Column(type="string", nullable = false) 
     * @Annotation\Attributes({"type":"text"})
     * @Annotation\Options({"label":"Status:"})
-    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^\open|close$/"}})
+    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^\open|close|pending|deny$/"}})
     */
     protected $status;
 
@@ -111,6 +120,8 @@ class Account {
     //Status
     const OPEN = 'open';
     const CLOSE = 'close';
+    const PENDING = 'pending';
+    const DENY = 'deny';
 
     //Periods
     const WEEKLY = 'weekly';
@@ -131,11 +142,19 @@ class Account {
     *
     * @param Service $objectManager The Entity Manager
     */
-    public function initAdd($objectManager) {
-        $this->nPaid = "0";
-        $this->setTimeStamp();
+    public function approve($objectManager) {
         $this->setStatus(Account::OPEN);
         $this->generatePayments($objectManager);
+    }
+
+    public function deny($objectManager) {
+        $this->setStatus(Account::DENY);
+    }
+
+    public function initRequest() {
+        $this->nPaid = "0";
+        $this->setTimeStamp();
+        $this->setStatus(Account::PENDING);
     }
 
     /**
@@ -237,6 +256,10 @@ class Account {
         return $this->firstPayDate->format('Y-m-d');
     }
 
+    public function getRequestDateStr() {
+        return $this->requestDate->format('Y-m-d');   
+    }
+
     /**
     * @return string An HTML formatted string to show reporting details about the account
     */
@@ -259,6 +282,12 @@ class Account {
     //Getters
     public function getAccountId() {
         return $this->accountId;
+    }
+    public function getRequestDate() {
+        if ($this->requestDate == null) {
+            return $this->requestDate;
+        }
+        return $this->requestDate->format('Y-m-d');
     }
     public function getFirstPayDate() {
         if ($this->firstPayDate == null) {
@@ -291,6 +320,9 @@ class Account {
         return $this->timeStamp;
     }
     //Setters
+    public function setRequestDate($rd) {
+        $this->requestDate = $rd;
+    }
     public function setFirstPayDate($fpd) {
         $this->firstPayDate = $fpd;
     }

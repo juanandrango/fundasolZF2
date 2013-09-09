@@ -26,14 +26,22 @@ class ClientController extends AbstractActionController {
     private function getClientRepository() {
         return $this->objectManager->getRepository('Client\Entity\Client');
     }
+    private function getContributionRepository() {
+        return $this->objectManager->getRepository('Contribution\Entity\Contribution');
+    }
     private function getAccountRepository() {
         return $this->objectManager->getRepository('Account\Entity\Account');
+    }
+    private function getInvestorRepository() {
+        return $this->objectManager->getRepository('Investor\Entity\Investor');
     }
 
     private function updateCounts() {
         $this->objectManager = $this->getObjectManager();
         \Client\Entity\Client::$count = count($this->getClientRepository()->findAll());
+        \Investor\Entity\Investor::$count = count($this->getInvestorRepository()->findAll());
         \Account\Entity\Account::$count = count($this->getAccountRepository()->findAll());
+        \Contribution\Entity\Contribution::$count = count($this->getContributionRepository()->findAll());
     }
 
     public function showAllAction() {
