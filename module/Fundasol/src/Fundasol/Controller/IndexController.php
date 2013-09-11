@@ -46,8 +46,11 @@ class IndexController extends AbstractActionController {
     	$this->updateCounts();
     	$this->objectManager = $this->getObjectManager();
         return new ViewModel(array(
-        	'payments'	=> $this->getPaymentRepository()->findAll(),
-        	'contributions' => $this->getContributionRepository()->findAll()
+        	'payments'		=> $this->getPaymentRepository()->findAll(),
+        	'accounts' 		=> $this->getAccountRepository()->findAll(),
+        	'contributions' => $this->getContributionRepository()->findAll(),
+        	'rangeStart'	=> $this->getRequest()->getPost('rangeStart'),
+        	'rangeEnd'		=> $this->getRequest()->getPost('rangeEnd'),
         	)
         );
     }

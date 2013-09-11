@@ -50,6 +50,16 @@ class Fundasol {
 		return $amount;	
 	}
 
+	public static function amountRequested($accounts) {
+		$amount = 0;
+		foreach ($accounts as $account) {
+			if ($account->getStatus() == \Account\Entity\Account::PENDING) {
+				$amount += $account->getAmount();
+			}
+		}
+		return $amount;
+	}
+
 	public static function amountAvailable($contributions, $payments) {
 		return Fundasol::amountTotal($contributions) - Fundasol::amountOnTransit($payments);
 	}
@@ -57,7 +67,7 @@ class Fundasol {
 	public static function amountTotal($contributions) {
 		$amount = 0;
 		foreach ($contributions as $contribution) {
-			if ($contribution->getStatus() == \contribution\Entity\contribution::OPEN) {
+			if ($contribution->getStatus() == \Contribution\Entity\Contribution::OPEN) {
 				$amount += $contribution->getAmount();
 			}
 		}
