@@ -4,11 +4,17 @@ use Doctrine\ORM\Mapping as ORM;
 use Zend\Form\Annotation;
 
 /** 
+* Investor Entity with Business Logic
+*
+* An investor is a person that commits contributions to Fundasol. An investor can have 1 or more contributions.
+* Investors earn interest on their contributions
+*
 * @ORM\Entity 
 * @Annotation\Name("Investor")
 * @Annotation\Hydrator({"type":"Zend\Stdlib\Hydrator\ClassMethods", "options": {"underscoreSeparatedKeys": false}})
 */
 class Investor {
+    // ============================== Database Columns ============================== //
     /**
     * @ORM\Id
     * @ORM\GeneratedValue(strategy="AUTO")
@@ -104,92 +110,114 @@ class Investor {
     * @Annotation\Exclude()
     */
     protected $timeStamp;
-
-    // =========================================================================
-
-    public static $count;
-
-	// public function __get($property) {
-	// 	return (isset($this->{$property}) ? $this->{$property} : null);
-	// }
-
-    public function __construct() {
-        $this->contributions = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-
-    //Getters
+    
+    // ------------------------------ Getters ------------------------------ //
     public function getInvestorId() {
-    	return $this->investorId;
+        return $this->investorId;
     }
     public function getContributions() {
         return $this->contributions;
     }
     public function getFirstName() {
-    	return $this->firstName;
+        return $this->firstName;
     }
     public function getLastName() {
-    	return $this->lastName;
+        return $this->lastName;
     }
     public function getStateId() {
-    	return $this->stateId;
+        return $this->stateId;
     }
     public function getStatus() {
-    	return $this->status;
+        return $this->status;
     }
     public function getPhoneHome() {
-    	return $this->phoneHome;
+        return $this->phoneHome;
     }
     public function getPhoneWork() {
-    	return $this->phoneWork;
+        return $this->phoneWork;
     }
     public function getPhoneReference() {
-    	return $this->phoneReference;
+        return $this->phoneReference;
     }
     public function getPhoneCell() {
-    	return $this->phoneCell;
+        return $this->phoneCell;
     }
     public function getAddressHome() {
-    	return $this->addressHome;
+        return $this->addressHome;
     }
     public function getAddressWork() {
-    	return $this->addressWork;
+        return $this->addressWork;
     }
     public function getTimeStamp() {
-    	return $this->timeStamp;
+        return $this->timeStamp;
     }
 
-    //Setters
+    // ------------------------------ Setters ------------------------------ //
     public function setContributions($a) {
         $this->contributions = $a;
     }
     public function setFirstName($fn) {
-    	$this->firstName = $fn;
+        $this->firstName = $fn;
     }
     public function setLastName($ln) {
-    	$this->lastName = $ln;
+        $this->lastName = $ln;
     }
-   	public function setStateId($sId) {
-   		$this->stateId = $sId;
-   	}
-   	public function setStatus($s) {
-   		$this->status = $s;
-   	}
-   	public function setPhoneHome($ph) {
-   		$this->phoneHome = $ph;
-   	}
-   	public function setPhoneReference($pr) {
-   		$this->phoneReference = $pr;
-   	}
-   	public function setPhoneCell($pc) {
-   		$this->phoneCell = $pc;
-   	}
-   	public function setAddressHome($ah) {
-   		$this->addressHome = $ah;
-   	}
-   	public function setAddressWork($aw) {
-   		$this->addressWork = $aw;
-   	}
-   	public function setTimeStamp() {
+    public function setStateId($sId) {
+        $this->stateId = $sId;
+    }
+    public function setStatus($s) {
+        $this->status = $s;
+    }
+    public function setPhoneHome($ph) {
+        $this->phoneHome = $ph;
+    }
+    public function setPhoneReference($pr) {
+        $this->phoneReference = $pr;
+    }
+    public function setPhoneCell($pc) {
+        $this->phoneCell = $pc;
+    }
+    public function setAddressHome($ah) {
+        $this->addressHome = $ah;
+    }
+    public function setAddressWork($aw) {
+        $this->addressWork = $aw;
+    }
+    public function setTimeStamp() {
         $this->timeStamp = new \DateTime("now");
-   	}
+    }
+    
+    // ============================== Business Logic ============================== //
+
+    // ------------------------------ Static Properties ------------------------------//
+    private static $count;
+
+    // ------------------------------ Static Methods ------------------------------//
+    public static function getCount() {
+        return Investor::$count;
+    }
+    public static function updateCount($objectManager) {
+        Investor::$count = count($objectManager->getRepository('Investor\Entity\Investor')->findAll());
+    }
+
+    /**
+    * @param Service $objectManager The Entity Manager
+    * @param string $stateId The state ID to look up against
+    * @param form $form A reference to the form we will be using to display error messages on
+    * @return bool Returns true if stateID is indeed unique, else it returns false and renders error message on form
+    */
+    public static function isUniqueStateId($objectManager, $stateId, &$form) {
+        $repo = $objectManager->getRepository("Investor\Entity\Investor");
+        $nullInvestor = $repo->findOneBy(array("stateId" => $stateId));            
+        if ($nullInvestor != null) {
+            $form->get("stateId")->setMessages(array("Repeated State Id"));
+            return false;
+        }       
+        return true;
+    }
+
+    // ------------------------------ Methods ------------------------------ //
+    public function __construct() {
+        $this->contributions = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 }

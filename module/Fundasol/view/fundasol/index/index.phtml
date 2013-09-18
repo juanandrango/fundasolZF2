@@ -7,9 +7,16 @@ $startDate = $this->rangeStart;
 $endDate = $this->rangeEnd;
 
 
-$amountDueByE = \Fundasol\Model\Fundasol::amountExpected($payments, $startDate, $endDate);
-$amountDueByR = \Fundasol\Model\Fundasol::amountReality($payments, $startDate, $endDate);
-$amountCollected = \Fundasol\Model\Fundasol::amountCollected($payments, $startDate, $endDate);
+
+$expectedArray = \Fundasol\Model\Fundasol::getExpectedArray($payments, $startDate, $endDate);
+$expectedTotal = \Fundasol\Model\Fundasol::getTotalAmount(array_values($expectedArray));
+
+$realityArray = \Fundasol\Model\Fundasol::getRealityArray($payments, $startDate, $endDate);
+$realityTotal = \Fundasol\Model\Fundasol::getTotalAmount(array_values($realityArray));
+
+$collectedArray = \Fundasol\Model\Fundasol::getCollectedArray($payments, $startDate, $endDate);
+$collectedTotal = \Fundasol\Model\Fundasol::getTotalAmount(array_values($collectedArray));
+
 $amountOnTransit = \Fundasol\Model\Fundasol::amountOnTransit($payments);
 $amountRequested = \Fundasol\Model\Fundasol::amountRequested($accounts);
 $amountAvailable = \Fundasol\Model\Fundasol::amountAvailable($contributions, $payments);
@@ -26,19 +33,103 @@ $amountTotal = \Fundasol\Model\Fundasol::amountTotal($contributions);
 	<input type="submit" class="btn" name="setRangeBtn" value="refresh" />
 </form> 
 
+<div class='container'>
+	<div class="row-fluid">
 
-<dl class="dl-horizontal">
-	<dt>Expected</dt><dd><?php echo $amountDueByE . PHP_EOL; ?></dd>
-    <dt>Reality</dt><dd><?php echo $amountDueByR . PHP_EOL; ?></dd>
-    <dt>Collected</dt><dd><?php echo $amountCollected . PHP_EOL; ?></dd>
-    <dt>On Transit</dt><dd><?php echo $amountOnTransit . PHP_EOL; ?></dd>
-    <dt>Requested</dt><dd> <?php echo $amountRequested . PHP_EOL; ?></dd>
-    <dt>Available</dt><dd><?php echo $amountAvailable . PHP_EOL; ?></dd>
-    <dt>TOTAL</dt><dd><?php echo $amountTotal . PHP_EOL; ?></dd>
-</dl>
+		<div id="expectedVsRealityChartCtr" class="span8">
+			<canvas id="expectedVsRealityChart"></canvas>
+		</div>
+
+		<div class="span4">
+			<dl class="dl-horizontal">
+				<dt>Expected 	</dt><dd><?php echo $expectedTotal . PHP_EOL; ?></dd>
+			    <dt>Reality 	</dt><dd><?php echo $realityTotal . PHP_EOL; ?></dd>
+			    <dt>Collected 	</dt><dd><?php echo $collectedTotal . PHP_EOL; ?></dd>
+			    <dt>On Transit 	</dt><dd><?php echo $amountOnTransit . PHP_EOL; ?></dd>
+			    <dt>Requested 	</dt><dd><?php echo $amountRequested . PHP_EOL; ?></dd>
+			    <dt>Available 	</dt><dd><?php echo $amountAvailable . PHP_EOL; ?></dd>
+			    <dt>TOTAL 		</dt><dd><?php echo $amountTotal . PHP_EOL; ?></dd>
+			</dl>
+		</div>
+
+	</div>
+	<div class="row-fluid">
+		<div class="span8" id="collectedGraphCtr">
+			<canvas id="collectedGraph"></canvas>
+		</div>
+		<div class="span4">
+		</div>
+	</div>
+</div>
 
 
 <script>
+
+//Chart =====================================
+
+var canvas = $('#expectedVsRealityChart');
+var context = canvas.get(0).getContext("2d");
+var container = $('#expectedVsRealityChartCtr'); 
+
+var data = {
+	labels : <?php echo json_encode(array_keys($expectedArray)); ?> ,
+	datasets : [
+		{
+			fillColor : "rgba(50,134,149,1)",
+			strokeColor : "rgba(50,134,149,1)",
+			pointColor : "rgba(50,134,149,1)",
+			pointStrokeColor : "#fff",
+			data : <?php echo json_encode(array_values($expectedArray)); ?>
+		},
+		{
+			fillColor : "rgba(153,193, 58, 1)",
+			strokeColor : "rgba(153,193, 58, 1)",
+			pointColor : "rgba(153,193, 58 ,1)",
+			pointStrokeColor : "#fff",
+			data : <?php echo json_encode(array_values($realityArray)); ?>
+		}
+	]
+}
+
+var options = {
+	scaleOverlay: true,
+	scaleShowGridLines: false,
+}
+
+
+var collectedCanvas = $('#collectedGraph');
+var collectedContext = collectedCanvas.get(0).getContext("2d");
+var collectedContainer = $('#collectedGraphCtr'); 
+
+var collectedData = {
+	labels : <?php echo json_encode(array_keys($expectedArray)); ?> ,
+	datasets : [
+		{
+			fillColor : "rgba(168,60, 180, 1)",
+			strokeColor : "rgba(168,60, 180, 1)",
+			pointColor : "rgba(168,60, 180,1)",
+			pointStrokeColor : "#fff",
+			data : <?php echo json_encode(array_values($collectedArray)); ?>
+		}
+	]
+}
+
+$(window).resize(respondCanvas);
+
+function respondCanvas() {
+    canvas.attr('width', container.width() - 20);
+    canvas.attr('height', 200);
+	var myNewChart = new Chart(context).Bar(data, options);
+
+	collectedCanvas.attr('width', collectedContainer.width() - 20);
+    collectedCanvas.attr('height', 200);
+	var myNewCollectedChart = new Chart(collectedContext).Bar(collectedData, options);
+}
+
+//Initial call 
+respondCanvas();
+
+//End Chart =================================
 
 $('input[name="rangeStart"]').datepicker({ 
     dateFormat: 'yy-mm-dd' , 

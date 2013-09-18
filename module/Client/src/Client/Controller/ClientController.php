@@ -11,44 +11,51 @@ use DoctrineORMModule\Form\Annotation\AnnotationBuilder;
 
 class ClientController extends AbstractActionController {
     
+    // ------------------------------ Properties ------------------------------ //
     /**
     * It is the Entity manager provided by Doctrine
     * @var Service
     */
     protected $objectManager;
 
+    // ------------------------------ Methods ------------------------------ //
     /**
     * @return Service Entity Manager instance
     */
     private function getObjectManager() {
         return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
-    }
-    private function getClientRepository() {
-        return $this->objectManager->getRepository('Client\Entity\Client');
-    }
-    private function getContributionRepository() {
-        return $this->objectManager->getRepository('Contribution\Entity\Contribution');
-    }
-    private function getAccountRepository() {
-        return $this->objectManager->getRepository('Account\Entity\Account');
-    }
-    private function getInvestorRepository() {
-        return $this->objectManager->getRepository('Investor\Entity\Investor');
+    }   
+
+    /**
+    * @param string $repoStr The name of the Class 
+    * @return Repository Should return the corresponding repository
+    */
+    private function getRepository($repoStr) {
+        if ($this->objectManager == null) {
+            $this->objectManager = $this->getObjectManager();
+        }
+        return $this->objectManager->getRepository($repoStr . "\\Entity\\" . $repoStr);
     }
 
+
     private function updateCounts() {
-        $this->objectManager = $this->getObjectManager();
-        \Client\Entity\Client::$count = count($this->getClientRepository()->findAll());
-        \Investor\Entity\Investor::$count = count($this->getInvestorRepository()->findAll());
-        \Account\Entity\Account::$count = count($this->getAccountRepository()->findAll());
-        \Contribution\Entity\Contribution::$count = count($this->getContributionRepository()->findAll());
+        if ($this->objectManager == null) {
+            $this->objectManager = $this->getObjectManager();        
+        }
+        \Client\Entity\Client::updateCount($this->objectManager);
+        \Investor\Entity\Investor::updateCount($this->objectManager);
+        \Account\Entity\Account::updateCount($this->objectManager);
+        \Contribution\Entity\Contribution::updateCount($this->objectManager);
     }
+
+
+    // ============================== Action Methods ============================== //
 
     public function showAllAction() {
         $this->updateCounts();
         $this->objectManager = $this->getObjectManager();
         return new ViewModel( array(
-            'allClients' => $this->getClientRepository()->findAll()
+            'allClients' => $this->getRepository('Client')->findAll()
             ) 
         );
     }
@@ -56,9 +63,9 @@ class ClientController extends AbstractActionController {
     public function showAction() {
         $this->updateCounts();
         if ($this->params()->fromRoute('clientId', 0) != "") {
-            $this->objectManager = $this->getObjectManager();        
             $clientId = (int)$this->params()->fromRoute('clientId', 0);
-            $client = $this->getClientRepository()->findOneBy(array("clientId" => $clientId));
+            $this->objectManager = $this->getObjectManager();        
+            $client = $this->getRepository('Client')->findOneBy(array("clientId" => $clientId));
             if ($client != null) {
                 $builder = new AnnotationBuilder($this->objectManager);
                 $form = $builder->createForm($client);
@@ -78,9 +85,9 @@ class ClientController extends AbstractActionController {
     public function editAction() {
         $this->updateCounts();
         if ($this->getRequest()->isPost()) {
-            $this->objectManager = $this->getObjectManager();        
-            $stateId = (int)$this->getRequest()->getPost('clientId');            
-            $client = $this->getClientRepository()->findOneBy(array("clientId" => $stateId));
+            $clientId = (int)$this->getRequest()->getPost('clientId');            
+            $this->objectManager = $this->getObjectManager();                    
+            $client = $this->getRepository('Client')->findOneBy(array("clientId" => $clientId));
             if ($client != null) {
                 $builder = new AnnotationBuilder($this->objectManager);
                 $form = $builder->createForm($client);
@@ -93,8 +100,7 @@ class ClientController extends AbstractActionController {
                 }
                 return new ViewModel( array(
                     'client'    => $client, 
-                    'form'      => $form,
-                    'clientId'  => $clientId,
+                    'form'      => $form
                     ) 
                 );  
             }                      
@@ -112,55 +118,20 @@ class ClientController extends AbstractActionController {
         $form->bind($client);
         if ($this->getRequest()->isPost()) {
             $form->setData($this->getRequest()->getPost());
-            $uniqueStateId = $this->getRequest()->getPost('stateId');
-            $nullClient = $this->getClientRepository()->findOneBy(array("stateId" => $uniqueStateId));
-            if ($form->isValid()) {
-                if ($nullClient != null) {
-                    $form->get("stateId")->setMessages(array("Repeated State Id"));
-                } else {
-                    $client->setTimeStamp();
-                    $this->objectManager->persist($client);          
-                    $this->objectManager->flush();
-                    $clientId = $client->getClientId();                             
-                    $this->redirect()->toRoute('clients/Client', 
-                        array(
-                            'action'    => 'show',
-                            'clientId'  => $clientId, 
-                        )
-                    );
-                } 
+            $stateId = $this->getRequest()->getPost('stateId');            
+            if ($form->isValid() && \Client\Entity\Client::isUniqueStateId($this->objectManager, $stateId, $form)) {
+                $client->setTimeStamp();
+                $this->objectManager->persist($client);          
+                $this->objectManager->flush();
+                $clientId = $client->getClientId();                             
+                $this->redirect()->toRoute('clients/Client', 
+                    array(
+                        'action'    => 'show',
+                        'clientId'  => $clientId, 
+                    )
+                ); 
             }
         }
         return new ViewModel( array('form' => $form)); 
-    }
-
-    public function deleteAction() {
-        $this->updateCounts();
-        $clientId = $this->getRequest()->getPost('clientId');
-        if ($this->getRequest()->getPost('sureDelete') == 'yes') {
-            $this->objectManager = $this->getObjectManager();        
-            $client = $this->getClientRepository()->findOneBy(array("clientId" => $clientId));
-            if ($client != null) {
-                $this->objectManager->remove($client);
-                $this->objectManager->flush();
-                 $this->redirect()->toRoute('clients/Client', 
-                    array(
-                        'action' => 'showAll',
-                    )
-                );
-            } else {
-                //No Client found
-                $this->redirect()->toRoute('home');
-            }
-        } else if($this->getRequest()->getPost('sureDelete') == 'no') {
-             $this->redirect()->toRoute('clients/Client', 
-                array(
-                    'action' => 'show',
-                    'clientId' => $clientId, 
-                )
-            );
-        } else {
-            return new ViewModel( array('clientId' => $clientId));
-        }
     }
 }

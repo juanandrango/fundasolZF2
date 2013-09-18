@@ -1,8 +1,7 @@
 <?php
 $account = $this->account;
 $client = $this->account->getClient();
-$client_html =  $client->getLastName() . ", " . $client->getFirstName();
-$client_status_html = "Pending";
+$client_html =  ucwords($client->getLastName() . ", " . $client->getFirstName());
 $payments = $account->getPayments();
 
 $paymentAttrs = array(
@@ -18,34 +17,42 @@ if ($account->getStatus() == \Account\Entity\Account::PENDING) {
   $isPending = true;
 }
 
+$paymentCounts = $account->getPaymentCounts();
+$paymentRecord = $account->getPaymentRecord();
 
 ?>
 
-  <h2> Account <?php echo $account->getAccountId(); ?> <small> <?php echo ucwords($client_html); ?></small> </h2>
+  <h2> Account <?php echo $account->getAccountId(); ?> <small> <a href="<?php echo $this->url('clients/Client', array('action'=>'show', 'clientId' => $client->getClientId() )); ?>"> <?php echo $client_html; ?> </a> <small></h2>
   
   <div class='tabbable'>
     
     <ul class='nav nav-tabs'>
-      <li class="<?php if (!$isPending) { echo 'active'; } else { echo 'hidden'; } ?>"><a href='#account_payments' data-toggle='tab'>Payments</a></li>
-      <li class="<?php if ($isPending) { echo 'active'; } ?>"><a href='#account_info' data-toggle='tab'> Informacion</a></li>
+      <li class="active"><a href='#account_info' data-toggle='tab'> Information</a></li>
+      <li class="<?php if ($isPending) { echo 'hidden'; } ?>"><a href='#account_payments' data-toggle='tab'>Payments</a></li>
     </ul>
     <div class='tab-content'>
-      <div class="tab-pane <?php if ($isPending) { echo 'active'; } ?>" id='account_info'>
+      <div class="tab-pane active" id='account_info'>
         <div class="row-fluid">
-          <div class="span6">
-            <dl class='dl-horizontal'>
-              <dt> Needed By      </dt> <dd> <?php echo $account->getRequestDate(); ?> </dd>
-              <dt> Payments Start </dt> <dd> <?php echo $account->getFirstPayDate(); ?> </dd>
-              <dt> Amount         </dt> <dd> <?php echo $account->getAmount(); ?> </dd>
-              <dt> Number Paid    </dt> <dd> <?php echo $account->getNPaid(); ?> / <?php echo $account->getNPayments(); ?> </dd>
-              <dt> Pay Period     </dt> <dd> <?php echo $account->getPayPeriod(); ?> </dd>
-              <dt> Status         </dt> <dd> <?php echo $account->getStatus(); ?> </dd>
-            </dl>
+          <div class="span5">
+            <div class="row-fluid">
+              <div class="span4">                      
+                <dl>
+                  <dt>Needed By      </dt> <dd><?php echo $account->getRequestDate(); ?> </dd>
+                  <dt>Payments Start </dt> <dd><?php echo $account->getFirstPayDate(); ?> </dd>
+                  <dt>Amount         </dt> <dd><?php echo $account->getAmount(); ?> </dd>
+                  <dt>Number Paid    </dt> <dd><?php echo $account->getNPaid(); ?>/<?php echo $account->getNPayments(); ?> </dd>
+                  <dt>Pay Period     </dt> <dd><?php echo $account->getPayPeriod(); ?> </dd>
+                  <dt>Status         </dt> <dd><?php echo $account->getStatus(); ?> </dd>
+                </dl>
+              </div>
+              <div class="well offset1 span7" id="accountCGraphsCtr">
+                <canvas id="accountCompletenessGraph"></canvas>
+              </div>
+            </div>
           </div>
-          <div class="span6">
-            <h4> Report </h4>
-            <?php echo $account->getHTMLReport(); ?>
-          </div>
+          <div class="well offset1 span6" id="accountHGraphsCtr">
+            <canvas id="accountHistoryGraph"></canvas>            
+          </div>            
         </div>
         <?php
           if ($isPending) {
@@ -63,7 +70,7 @@ if ($account->getStatus() == \Account\Entity\Account::PENDING) {
           }
         ?>
       </div>
-      <div class="tab-pane <?php if (!$isPending) { echo 'active'; } else { echo 'hidden';} ?>" id='account_payments'>
+      <div class="tab-pane <?php if ($isPending) { echo 'hidden';} ?>" id='account_payments'>
         <?php 
         if ($account->getStatus() == \Account\Entity\Account::OPEN) {
           echo '<form action="/accounts/Account/pay" method="post">' . PHP_EOL 
@@ -109,3 +116,80 @@ if ($account->getStatus() == \Account\Entity\Account::PENDING) {
       </div>
     </div>
   </div>
+
+<script>
+//Chart =====================================
+
+
+var accountHGraphsCtr = $('#accountHGraphsCtr');
+var accountCGraphsCtr = $('#accountCGraphsCtr');
+
+var accountCGCanvas = $('#accountCompletenessGraph');
+var accountHGCanvas = $('#accountHistoryGraph');
+
+var accountCGContext = accountCGCanvas.get(0).getContext("2d");
+var accountHGContext = accountHGCanvas.get(0).getContext("2d");
+
+var accountCGData = [
+    {
+        value: <?php echo $paymentCounts[\Payment\Entity\Payment::DUE]; ?>,
+        color: "#bbbbbb"
+    },
+    {
+        value: <?php echo $paymentCounts[\Payment\Entity\Payment::LATE]; ?>,
+        color: "#C3BD4B"
+    },
+    {
+        value: <?php echo $paymentCounts[\Payment\Entity\Payment::ONTIME]; ?>,
+        color: "#88BF40"
+    }
+]
+
+var accountHGData = {
+  labels : <?php echo json_encode(array_values($paymentRecord['labels'])); ?> ,
+  datasets : [
+    {
+      fillColor : "#bbbbbb",
+      strokeColor : "#bbbbbb",
+      pointColor : "#bbbbbb",
+      pointStrokeColor : "#fff",
+      data : <?php echo json_encode(array_values($paymentRecord[\Payment\Entity\Payment::DUE])); ?>
+    },
+    {
+      fillColor : "#C3BD4B",
+      strokeColor : "#C3BD4B",
+      pointColor : "#C3BD4B",
+      pointStrokeColor : "#fff",
+      data : <?php echo json_encode(array_values($paymentRecord[\Payment\Entity\Payment::LATE])); ?>
+    },
+    {
+      fillColor : "#88BF40",
+      strokeColor : "#88BF40",
+      pointColor : "#88BF40",
+      pointStrokeColor : "#fff",
+      data : <?php echo json_encode(array_values($paymentRecord[\Payment\Entity\Payment::ONTIME])); ?>
+    },
+  ]
+}
+
+var accountHGData
+
+$(window).resize(respondCanvasAccountShow);
+
+function respondCanvasAccountShow() {
+    accountCGCanvas.attr('width', accountCGraphsCtr.width());
+    accountCGCanvas.attr('height', 300);
+    accountHGCanvas.attr('width', accountHGraphsCtr.width() - 20);
+    accountHGCanvas.attr('height', 300);
+    
+    var accountCGChart = new Chart(accountCGContext).Doughnut(accountCGData);
+    var accountHGChart = new Chart(accountHGContext).Bar(accountHGData);
+}
+
+//Initial call 
+respondCanvasAccountShow();
+
+
+
+//End Chart =================================
+</script>

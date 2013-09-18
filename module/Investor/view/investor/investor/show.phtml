@@ -1,13 +1,13 @@
 <?php
     $investor = $this->investor;
     $contributions = $investor->getContributions();
-    $investor_html =  $investor->getLastName() . ", " . $investor->getFirstName();
-    $investor_status_html = "Pending";
     $form = $this->form;
     $form->prepare();
     $form->setAttribute('action', '/investors/Investor/edit');
     $form->setAttribute('method', 'post');
     $form->setAttribute('class', 'form-horizontal');
+
+    $investor_html =  ucwords($investor->getLastName() . ", " . $investor->getFirstName());
     $attrs = array(
         'firstName', 
         'lastName', 
@@ -27,12 +27,12 @@
     );
 ?>
 
-<h2> <?php echo ucwords($investor_html); ?> <small> <?php echo $investor_status_html;?></small> </h2>
+<h2> <?php echo $investor_html; ?> </h2>
 
 <div class='tabbable'>
     <ul class='nav nav-tabs'>
-        <li class='active'><a href='#investor_info' data-toggle='tab'> Informacion</a></li>
-        <li><a href='#investor_contributions' data-toggle='tab'>Contribuciones</a></li>
+        <li class='active'><a href='#investor_info' data-toggle='tab'> Informacion </a></li>
+        <li><a href='#investor_contributions' data-toggle='tab'> Contribuciones </a></li>
     </ul>
 
     <div class='tab-content'>
@@ -47,7 +47,6 @@
             <input type="hidden" name="investorId" value="<?php echo $investor->getInvestorId(); ?>"/>
             <div class='form-actions'>
                 <button type='submit' class='btn btn-primary'> Actualizar </button>
-                <button type='submit' class='btn btn-danger' formaction="/investors/Investor/delete"> Delete </button>
             </div> 
             <?php
                 echo $this->form()->closeTag($form);
@@ -57,7 +56,7 @@
         <div class='tab-pane' id='investor_contributions'>
             <form action="/contributions/Contribution/add" method="post">
                 <input type="hidden" name="investorId" value="<?php echo $investor->getInvestorId(); ?>"/>
-                <input type="submit" class='btn' value="Create Contribucion" formaction="/contributions/Contribution/add" />
+                <input type="submit" class='btn' value="Create Contribution" formaction="/contributions/Contribution/add" />
             </form>
             <table class='table'> 
                 <thead>
@@ -76,9 +75,9 @@
                         foreach($contributions as $tmp_contribution) {
                             echo "<tr>";
                     ?>
-                    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() ));?>"> <?php echo $tmp_contribution->getContributionId(); ?> </a></td>
-                    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() ));?>"> <?php echo $tmp_contribution->getAmount(); ?> </a></td>
-                    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() ));?>"> <?php echo $tmp_contribution->getStatus(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('contributions/Contribution', array( 'action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() )); ?>"> <?php echo $tmp_contribution->getContributionId(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('contributions/Contribution', array( 'action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() )); ?>"> <?php echo $tmp_contribution->getAmount(); ?> </a></td>
+                    <td><a href="<?php echo $this->url('contributions/Contribution', array( 'action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() )); ?>"> <?php echo $tmp_contribution->getStatus(); ?> </a></td>
                     <?php
                             echo "</tr>";
                         }

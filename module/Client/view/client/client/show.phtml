@@ -1,8 +1,7 @@
 <?php
     $client = $this->client;
     $accounts = $client->getAccounts();
-    $client_html =  $client->getLastName() . ", " . $client->getFirstName();
-    $client_status_html = "Pending";
+    $client_html =  ucwords($client->getLastName() . ", " . $client->getFirstName());
     $form = $this->form;
     $form->prepare();
     $form->setAttribute('action', '/clients/Client/edit');
@@ -28,34 +27,46 @@
         '# Paid',
         'status'
         );
+
+    $paymentCounts = $client->getPaymentCounts();
 ?>
 
-<h2> <?php echo ucwords($client_html); ?> <small> <?php echo $client_status_html;?></small> </h2>
+<h2> <?php echo $client_html; ?> </h2>
 
 <div class='tabbable'>
     <ul class='nav nav-tabs'>
-        <li class='active'><a href='#client_info' data-toggle='tab'> Informacion</a></li>
-        <li><a href='#client_accounts' data-toggle='tab'>Cuentas</a></li>
+        <li class='active'><a href='#client_info' data-toggle='tab'> Information </a></li>
+        <li><a href='#client_accounts' data-toggle='tab'> Accounts </a></li>
     </ul>
 
     <div class='tab-content'>
 
         <div class='tab-pane active' id='client_info'>
-            <?php
-                echo $this->form()->openTag($form);
-                foreach ($attrs as $attr) {
-                    echo $this->formRow($form->get($attr));
-                }
-            ?>
-            <input type="hidden" name="clientId" value="<?php echo $client->getClientId(); ?>"/>
-            <div class='form-actions'>
-                <button type='submit' class='btn btn-primary'> Actualizar </button>
-                <button type='submit' class='btn btn-danger' formaction="/clients/Client/delete"> Delete </button>
-            </div> 
-            <?php
-                echo $this->form()->closeTag($form);
-            ?>
-        </div>    
+            <div class="row-fluid">
+                <div class="span6">
+                    <?php
+                    echo $this->form()->openTag($form);
+                        foreach ($attrs as $attr) {
+                            echo $this->formRow($form->get($attr));
+                        }
+                    ?>
+                    <input type="hidden" name="clientId" value="<?php echo $client->getClientId(); ?>"/>
+                    <div class='form-actions'>
+                        <button type='submit' class='btn btn-primary'> Update </button>
+                        <button type='submit' class='btn btn-danger' formaction="/clients/Client/delete"> Delete </button>
+                    </div> 
+                    <?php
+                        echo $this->form()->closeTag($form);
+                    ?>
+                </div>
+                <div class="offset1 span5" id="paymentByStatusContainer">
+                    <div class="well">
+                        <h3 class="text-center"> Overall Client Performance </h3>
+                        <canvas id="paymentByStatusCanvas"></canvas>
+                    </div>
+                </div>    
+            </div>
+        </div>
 
         <div class='tab-pane' id='client_accounts'>
             <form action="/accounts/Account/request" method="post">
@@ -108,5 +119,39 @@ $("div label").each(function() {
 });
 
 $('input').wrap('<div class="controls" />');
+
+//Chart =====================================
+
+var paymentByStatusCanvas = $('#paymentByStatusCanvas');
+var paymentByStatusCanvasContext = paymentByStatusCanvas.get(0).getContext("2d");
+var paymentByStatusContainer = $('#paymentByStatusContainer'); 
+
+var paymentByStatusData = [
+    {
+        value: <?php echo $paymentCounts[\Payment\Entity\Payment::DUE]; ?>,
+        color: "#bbbbbb"
+    },
+    {
+        value: <?php echo $paymentCounts[\Payment\Entity\Payment::LATE]; ?>,
+        color: "#C3BD4B"
+    },
+    {
+        value: <?php echo $paymentCounts[\Payment\Entity\Payment::ONTIME]; ?>,
+        color: "#88BF40"
+    },
+]
+
+$(window).resize(respondCanvas);
+
+function respondCanvas() {
+    paymentByStatusCanvas.attr('width', paymentByStatusContainer.width() - 20);
+    paymentByStatusCanvas.attr('height', 300);
+    var paymentByStatusChart = new Chart(paymentByStatusCanvasContext).Doughnut(paymentByStatusData);
+}
+
+//Initial call 
+respondCanvas();
+
+//End Chart =================================
 
 </script>

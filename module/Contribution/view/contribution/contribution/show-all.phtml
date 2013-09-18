@@ -1,33 +1,34 @@
 <?php	
 	$contributions = $this->allContributions;
   $attrs = array("Amount", "Investor", "Status");
-  ?>
+?>
 
 <table class='table'> 
   <thead>
     <tr>
       <?php
-      foreach($attrs as $key) {
-        echo "<th>" . $key . "</th>";
-      }
+        foreach($attrs as $key) {
+          echo "<th>" . $key . "</th>";
+        }
       ?>
     </tr>
   </thead>
   <tbody>
     <?php
-    foreach($contributions as $tmp_contribution) {
+      foreach($contributions as $tmp_contribution) {
       	if ($tmp_contribution->getStatus() == \Contribution\Entity\Contribution::OPEN) {
           echo "<tr class='success'>";
         } else {
           echo "<tr>";
         }
     ?>
-    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() ));?>"> <?php echo $tmp_contribution->getAmount(); ?> </a></td>
-    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() ));?>"> <?php echo ucwords($tmp_contribution->getInvestor()->getLastName() . ", " . $tmp_contribution->getInvestor()->getFirstName()); ?> </a></td>
-    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() ));?>"> <?php echo $tmp_contribution->getStatus(); ?> </a></td>
+    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() )); ?>"> <?php echo $tmp_contribution->getAmount();  ?> </a></td>
+    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() )); ?>"> <?php echo ucwords($tmp_contribution->getInvestor()->getLastName() 
+    . ", " . $tmp_contribution->getInvestor()->getFirstName()); ?> </a></td>
+    <td><a href="<?php echo $this->url('contributions/Contribution', array('action'=>'show', 'contributionId' => $tmp_contribution->getContributionId() )); ?>"> <?php echo $tmp_contribution->getStatus();  ?> </a></td>
     <?php
-    	echo "</tr>";
-    }
+          echo "</tr>";
+      } 
     ?>
   </tbody>
 </table>

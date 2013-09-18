@@ -1,12 +1,16 @@
-ZendSkeletonApplication
-=======================
+FUNDASOL ZF2
+============
 
 Introduction
 ------------
-This is a simple, skeleton application using the ZF2 MVC layer and module
-systems. This application is meant to be used as a starting place for those
-looking to get their feet wet with ZF2.
+Fundasol ZF2 is a financial web application with powerful analytic tools to produce
+fine-grained reports on accounts, clients, investors and contributions 
+activities. 
 
+It is written on top of the skeleton application sample provided by the Zend Framework 2. 
+Fundasol exploits the benefits of the MVC design system found in the framework, and also 
+uses Doctrine2 to provide a database engine independent solution and to obscure explicit 
+database handling to further secure and monitor data in a more object-oriented fashion.
 
 Installation
 ------------

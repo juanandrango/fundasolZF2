@@ -25,6 +25,7 @@ use Zend\Form\Annotation;
 * @Annotation\Hydrator({"type":"Zend\Stdlib\Hydrator\ClassMethods", "options": {"underscoreSeparatedKeys": false}})
 */
 class Account {
+    // ============================== Database Columns ============================== //
     /**
     * @ORM\Id
     * @ORM\GeneratedValue(strategy="AUTO")
@@ -89,7 +90,7 @@ class Account {
     /**
     * @ORM\ManyToOne(targetEntity="Client\Entity\Client", inversedBy="accounts")
     * @ORM\JoinColumn(name="myClientId", referencedColumnName="clientId")
-     **/
+    */
     protected $client;
     
     /**
@@ -117,6 +118,82 @@ class Account {
     */
     protected $timeStamp;
 
+    // ------------------------------ Getters ------------------------------ //
+    public function getAccountId() {
+        return $this->accountId;
+    }
+    public function getRequestDate() {
+        if ($this->requestDate == null) {
+            return $this->requestDate;
+        }
+        return $this->requestDate->format('Y-m-d');
+    }
+    public function getFirstPayDate() {
+        if ($this->firstPayDate == null) {
+            return $this->firstPayDate;
+        }
+        return $this->firstPayDate->format('Y-m-d');
+    }
+    public function getPayPeriod() {
+        return $this->payPeriod;
+    }
+    public function getAmount() {
+        return $this->amount;
+    }
+    public function getPayments() {
+        return $this->payments;
+    }
+    public function getNPayments() {
+        return $this->nPayments;
+    }
+    public function getClient() {
+        return $this->client;
+    }
+    public function getNPaid() {
+        return $this->nPaid;
+    }
+    public function getStatus() {
+        return $this->status;
+    }
+    public function getTimeStamp() {
+        return $this->timeStamp;
+    }
+    // ------------------------------ Setters ------------------------------ //
+    public function setRequestDate($rd) {
+        $this->requestDate = $rd;
+    }
+    public function setFirstPayDate($fpd) {
+        $this->firstPayDate = $fpd;
+    }
+    public function setPayPeriod($pp) {
+        $this->payPeriod = $pp;
+    }
+    public function setAmount($newAmount) {
+        $this->amount = $newAmount;
+    }
+    public function setPayments($p) {
+        $this->payments = $p;
+    }
+    public function setNPayments($np) {
+        $this->nPayments = $np;
+    }
+    public function setClient($c) {
+        $this->client = $c;
+    }
+    public function setNPaid($np) {
+        $this->nPaid = $np;
+    }
+    public function setStatus($s) {
+        $this->status = $s;
+    }
+    public function setTimeStamp() {
+        $this->timeStamp = new \DateTime("now");
+    }
+
+    // ============================== Business Logic ============================== //
+
+    // ------------------------------ Constants ------------------------------ //
+
     //Status
     const OPEN = 'open';
     const CLOSE = 'close';
@@ -126,10 +203,37 @@ class Account {
     //Periods
     const WEEKLY = 'weekly';
 
-    //BUSINESS LOGIC *************************************************************
+    // ------------------------------ Static Properties ------------------------------ //
+    private static $count;
 
-    public static $count;
+    // ------------------------------ Static Methods ------------------------------ //
+    public static function getCount() {
+        return Account::$count;
+    }
+    public static function updateCount($objectManager) {
+        Account::$count = count($objectManager->getRepository('Account\Entity\Account')->findAll());
+    }
 
+    /**
+    * @param date $requestDate The expected requested date for an Account
+    * @param date $firstPayDate The expected date for when to start making payments
+    * @param form $form A reference to the form to which to submit error messages to
+    * @return bool If both dates are valid return true, otherwise return false
+    */
+    public static function areDatesValid($requestDate, $firstPayDate, &$form) {
+        $valid = true;
+        if (\strtotime($requestDate) < \strtotime(\date("Y-m-d"))) {
+            $form->get("requestDate")->setMessages(array("Invalid Date"));
+            $valid = false;
+        }
+        if (\strtotime($firstPayDate) < \strtotime($requestDate)) {
+            $form->get("firstPayDate")->setMessages(array("Invalid Date"));
+            $valid = false;
+        }
+        return $valid;
+    }
+
+    // ------------------------------ Methods ------------------------------ //
     public function __construct() {
         $this->payments = new \Doctrine\Common\Collections\ArrayCollection();
     }
@@ -183,17 +287,19 @@ class Account {
     * @param Service $objectManager The Entity Manager
     */
     private function generatePayments($objectManager) {
-        for ($i = 0 ; $i < $this->nPayments ; $i++) {
-            $payment = new \Payment\Entity\Payment;
-            $payment->setAmount(number_format($this->amount/$this->nPayments, 2, '.', '') + "");
-            $payment->setPaymentNumber($i + 1);
-            $payment->setAccount($this);
-            $payment->setStatus(\Payment\Entity\Payment::DUE);
-            $payment->setTimeStamp();
-            $payment->setDueDate($this->firstPayDate, Account::WEEKLY);
-            $objectManager->persist($payment);
-            $this->getPayments()->add($payment);
-        }
+        if ($this->getPayments() == null) {
+            for ($i = 0 ; $i < $this->getNPayments() ; $i++) {
+                $payment = new \Payment\Entity\Payment;
+                $payment->setAmount(number_format($this->getAmount()/$this->getNPayments(), 2, '.', '') + "");
+                $payment->setPaymentNumber($i + 1);
+                $payment->setAccount($this);
+                $payment->setStatus(\Payment\Entity\Payment::DUE);
+                $payment->setTimeStamp();
+                $payment->setDueDate($this->getFirstPayDate(), $this->getPayPeriod());
+                $objectManager->persist($payment);
+                $this->getPayments()->add($payment);
+            }
+        }        
     }
 
     /**
@@ -252,102 +358,72 @@ class Account {
         }
     }
 
-    public function getFirstPayDateStr() {
-        return $this->firstPayDate->format('Y-m-d');
-    }
-
-    public function getRequestDateStr() {
-        return $this->requestDate->format('Y-m-d');   
+    /**
+    * @param string|null $format If format is provided use it, otherwise, use default
+    * @return string firstPayDate formatted to Y-m-d or given format
+    */
+    public function getFirstPayDateStr($format) {
+        if ($format == null) {            
+            return $this->firstPayDate->format('Y-m-d');
+        }
+        return $this->firstPayDate->format($format);
     }
 
     /**
-    * @return string An HTML formatted string to show reporting details about the account
+    * @param string|null $format If format is provided use it, otherwise, use default
+    * @return string requestDate formatted to Y-m-d or given format
     */
-    public function getHTMLReport() {
-        $HTMLReport = "<dl class='dl-horizontal' >" . PHP_EOL;
-        $HTMLReport .= "<dt> Completed </dt> <dd>" . (int)(($this->getNPaid()/$this->getNPayments()) * 100) . "% </dd>" . PHP_EOL;
-        $latePayments = 0;
-        foreach($this->getPayments() as $payment) {
-            if ($payment->getStatus() == \Payment\Entity\Payment::LATE) {
-                $latePayments ++;
-            }
+    public function getRequestDateStr($format) {
+        if ($format == null) {
+            return $this->requestDate->format('Y-m-d');   
         }
-        $HTMLReport .= "<dt> Late Payments </dt> <dd>" . $latePayments . "/" . $this->getNPaid() . "</dd>" . PHP_EOL;
-        $HTMLReport .= "</dl>";
-        return $HTMLReport;
+        return $this->requestDate->format($format);   
     }
     
-    //END BUSINESS LOGIC ************************************************************
 
-    //Getters
-    public function getAccountId() {
-        return $this->accountId;
-    }
-    public function getRequestDate() {
-        if ($this->requestDate == null) {
-            return $this->requestDate;
+    /**
+    * @return int[string] It returns the number of payments classified by Status
+    */
+    public  function getPaymentCounts() {
+        $counts = array(            
+            \Payment\Entity\Payment::DUE => 0,
+            \Payment\Entity\Payment::LATE => 0,
+            \Payment\Entity\Payment::ONTIME => 0,
+        );
+        foreach ($this->getPayments() as $payment) {
+            $counts[$payment->getStatus()] ++;
         }
-        return $this->requestDate->format('Y-m-d');
+        return $counts;
     }
-    public function getFirstPayDate() {
-        if ($this->firstPayDate == null) {
-            return $this->firstPayDate;
+
+    /**
+    * @return mixed[string][] It returns an array of labels with dates and respective activities
+    */ 
+    public function getPaymentRecord() {
+        $record = array(
+            'labels' => array(),
+            \Payment\Entity\Payment::DUE => array(),
+            \Payment\Entity\Payment::LATE => array(),
+            \Payment\Entity\Payment::ONTIME => array(),
+            );
+        foreach ($this->getPayments() as $payment) { 
+            if ($payment->getStatus() == \Payment\Entity\Payment::DUE) {
+                array_push($record['labels'], $payment->getDueDateStr());
+                array_push($record[\Payment\Entity\Payment::DUE], $payment->getAmount());
+                array_push($record[\Payment\Entity\Payment::LATE], 0);
+                array_push($record[\Payment\Entity\Payment::ONTIME], 0);
+            } else {
+                if ($payment->getStatus() == \Payment\Entity\Payment::ONTIME) {
+                    array_push($record[\Payment\Entity\Payment::ONTIME], $payment->getAmount());
+                    array_push($record[\Payment\Entity\Payment::LATE], 0);
+                } else {
+                    array_push($record[\Payment\Entity\Payment::LATE], $payment->getAmount());
+                    array_push($record[\Payment\Entity\Payment::ONTIME], 0);
+                }   
+                array_push($record['labels'], $payment->getPaidTimeStamp()->format('Y-m-d')); 
+                array_push($record[\Payment\Entity\Payment::DUE], 0);
+            }
         }
-        return $this->firstPayDate->format('Y-m-d');
-    }
-    public function getPayPeriod() {
-        return $this->payPeriod;
-    }
-    public function getAmount() {
-        return $this->amount;
-    }
-    public function getPayments() {
-        return $this->payments;
-    }
-    public function getNPayments() {
-        return $this->nPayments;
-    }
-    public function getClient() {
-        return $this->client;
-    }
-    public function getNPaid() {
-        return $this->nPaid;
-    }
-    public function getStatus() {
-        return $this->status;
-    }
-    public function getTimeStamp() {
-        return $this->timeStamp;
-    }
-    //Setters
-    public function setRequestDate($rd) {
-        $this->requestDate = $rd;
-    }
-    public function setFirstPayDate($fpd) {
-        $this->firstPayDate = $fpd;
-    }
-    public function setPayPeriod($pp) {
-        $this->payPeriod = $pp;
-    }
-    public function setAmount($newAmount) {
-        $this->amount = $newAmount;
-    }
-    public function setPayments($p) {
-        $this->payments = $p;
-    }
-    public function setNPayments($np) {
-        $this->nPayments = $np;
-    }
-    public function setClient($c) {
-        $this->client = $c;
-    }
-    public function setNPaid($np) {
-        $this->nPaid = $np;
-    }
-   	public function setStatus($s) {
-   		$this->status = $s;
-   	}
-   	public function setTimeStamp() {
-        $this->timeStamp = new \DateTime("now");
-   	}
+        return $record; 
+    }    
 }

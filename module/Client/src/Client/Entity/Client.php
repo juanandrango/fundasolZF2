@@ -17,6 +17,7 @@ use Zend\Form\Annotation;
 * @Annotation\Hydrator({"type":"Zend\Stdlib\Hydrator\ClassMethods", "options": {"underscoreSeparatedKeys": false}})
 */
 class Client {
+    // ============================== Database Columns ============================== //
     /**
     * @ORM\Id
     * @ORM\GeneratedValue(strategy="AUTO")
@@ -113,91 +114,131 @@ class Client {
     */
     protected $timeStamp;
 
-    // =========================================================================
-
-    public static $count;
-
-	// public function __get($property) {
-	// 	return (isset($this->{$property}) ? $this->{$property} : null);
-	// }
-
-    public function __construct() {
-        $this->accounts = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-
-    //Getters
+    // ------------------------------ Getters ------------------------------ //
     public function getClientId() {
-    	return $this->clientId;
+        return $this->clientId;
     }
     public function getAccounts() {
         return $this->accounts;
     }
     public function getFirstName() {
-    	return $this->firstName;
+        return $this->firstName;
     }
     public function getLastName() {
-    	return $this->lastName;
+        return $this->lastName;
     }
     public function getStateId() {
-    	return $this->stateId;
+        return $this->stateId;
     }
     public function getStatus() {
-    	return $this->status;
+        return $this->status;
     }
     public function getPhoneHome() {
-    	return $this->phoneHome;
+        return $this->phoneHome;
     }
     public function getPhoneWork() {
-    	return $this->phoneWork;
+        return $this->phoneWork;
     }
     public function getPhoneReference() {
-    	return $this->phoneReference;
+        return $this->phoneReference;
     }
     public function getPhoneCell() {
-    	return $this->phoneCell;
+        return $this->phoneCell;
     }
     public function getAddressHome() {
-    	return $this->addressHome;
+        return $this->addressHome;
     }
     public function getAddressWork() {
-    	return $this->addressWork;
+        return $this->addressWork;
     }
     public function getTimeStamp() {
-    	return $this->timeStamp;
+        return $this->timeStamp;
     }
 
-    //Setters
+    // ------------------------------ Setters ------------------------------ //
     public function setAccounts($a) {
         $this->accounts = $a;
     }
     public function setFirstName($fn) {
-    	$this->firstName = $fn;
+        $this->firstName = $fn;
     }
     public function setLastName($ln) {
-    	$this->lastName = $ln;
+        $this->lastName = $ln;
     }
-   	public function setStateId($sId) {
-   		$this->stateId = $sId;
-   	}
-   	public function setStatus($s) {
-   		$this->status = $s;
-   	}
-   	public function setPhoneHome($ph) {
-   		$this->phoneHome = $ph;
-   	}
-   	public function setPhoneReference($pr) {
-   		$this->phoneReference = $pr;
-   	}
-   	public function setPhoneCell($pc) {
-   		$this->phoneCell = $pc;
-   	}
-   	public function setAddressHome($ah) {
-   		$this->addressHome = $ah;
-   	}
-   	public function setAddressWork($aw) {
-   		$this->addressWork = $aw;
-   	}
-   	public function setTimeStamp() {
+    public function setStateId($sId) {
+        $this->stateId = $sId;
+    }
+    public function setStatus($s) {
+        $this->status = $s;
+    }
+    public function setPhoneHome($ph) {
+        $this->phoneHome = $ph;
+    }
+    public function setPhoneReference($pr) {
+        $this->phoneReference = $pr;
+    }
+    public function setPhoneCell($pc) {
+        $this->phoneCell = $pc;
+    }
+    public function setAddressHome($ah) {
+        $this->addressHome = $ah;
+    }
+    public function setAddressWork($aw) {
+        $this->addressWork = $aw;
+    }
+    public function setTimeStamp() {
         $this->timeStamp = new \DateTime("now");
-   	}
+    }
+
+    // ============================== Business Logic ============================== //
+
+    // ------------------------------ Static Properties ------------------------------ //
+    private static $count;
+
+    // ------------------------------ Static Methods ------------------------------ //
+    public static function getCount() {
+        return Client::$count;
+    }
+    public static function updateCount($objectManager) {
+        Client::$count = count($objectManager->getRepository('Client\Entity\Client')->findAll());
+    }
+
+	// ------------------------------ Methods ------------------------------ //
+    public function __construct() {
+        $this->accounts = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+    * @return int[string] It returns the payment count from all client's accounts sorted by status
+    */
+    public function getPaymentCounts() {
+        $counts = array(
+            \Payment\Entity\Payment::DUE => 0,
+            \Payment\Entity\Payment::LATE => 0,
+            \Payment\Entity\Payment::ONTIME => 0,
+            );
+        foreach($this->getAccounts() as $account) {
+            $tempCounts = $account->getPaymentCounts();
+            $counts[\Payment\Entity\Payment::DUE] += $tempCounts[\Payment\Entity\Payment::DUE];
+            $counts[\Payment\Entity\Payment::LATE] += $tempCounts[\Payment\Entity\Payment::LATE];
+            $counts[\Payment\Entity\Payment::ONTIME] += $tempCounts[\Payment\Entity\Payment::ONTIME];
+        }
+        return $counts;
+    }
+
+    /**
+    * @param Service $objectManager The Entity Manager
+    * @param string $stateId The state ID to look up against
+    * @param form $form A reference to the form we will be using to display error messages on
+    * @return bool Returns true if stateID is indeed unique, else it returns false and renders error message on form
+    */
+    public static function isUniqueStateId($objectManager, $stateId, &$form) {
+        $repo = $objectManager->getRepository("Client\Entity\Client");
+        $nullClient = $repo->findOneBy(array("stateId" => $stateId));            
+        if ($nullClient != null) {
+            $form->get("stateId")->setMessages(array("Repeated State Id"));
+            return false;
+        }       
+        return true;
+    }
 }

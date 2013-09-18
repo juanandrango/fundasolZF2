@@ -12,6 +12,7 @@
 ?>
 
 <h2> Add new Contribution </h2>
+
 <?php
     echo $this->form()->openTag($form);
     foreach($fields as $field) {
@@ -23,10 +24,10 @@
     <input type='hidden' name="investorId" value="<?php echo $this->investorId; ?>" />
     <input type='hidden' name="status" value="<?php echo \Contribution\Entity\Contribution::OPEN; ?>" />
     <button type='submit' name="addContributionSubmit" value="submit" class='btn btn-primary'> Add </button>
-</div> 
-<?php
-    echo $this->form()->closeTag($form);
-?>
+</div>
+
+<?php echo $this->form()->closeTag($form); ?>
+
 
 <script>
 $("label span").each(function() {

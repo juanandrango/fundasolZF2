@@ -20,6 +20,7 @@ echo $this->doctype();
 
         <!-- Scripts -->
         <?php echo $this->headScript()
+            ->prependFile($this->basePath() . '/js/Chart.min.js')
             ->prependFile($this->basePath() . '/js/bootstrap.js')
             ->prependFile($this->basePath() . '/js/jquery-ui-1.10.3.custom.min.js')            
             ->prependFile($this->basePath() . '/js/jquery-1.9.1.js')
@@ -38,7 +39,7 @@ echo $this->doctype();
                         <li class='dropdown'>
                             <a href='#' class='dropdown-toggle' data-toggle='dropdown'>
                                 Clientes <span class="badge badge-inverse"> 
-                                    <?php echo \Client\Entity\Client::$count; ?> 
+                                    <?php echo \Client\Entity\Client::getCount(); ?> 
                                 </span>
                             </a>
                             <ul class='dropdown-menu'>
@@ -49,7 +50,7 @@ echo $this->doctype();
                         <li class='dropdown'>
                             <a href="#" class='dropdown-toggle' data-toggle='dropdown'>
                                 Cuentas <span class="badge badge-inverse"> 
-                                    <?php echo \Account\Entity\Account::$count; ?> 
+                                    <?php echo \Account\Entity\Account::getCount(); ?> 
                                 </span>
                             </a>
                             <ul class='dropdown-menu'>
@@ -60,7 +61,7 @@ echo $this->doctype();
                         <li class='dropdown'>
                             <a href='#' class='dropdown-toggle' data-toggle='dropdown'>
                                 Investors <span class="badge badge-inverse"> 
-                                    <?php echo \Investor\Entity\Investor::$count; ?> 
+                                    <?php echo \Investor\Entity\Investor::getCount(); ?> 
                                 </span>
                             </a>
                             <ul class='dropdown-menu'>
@@ -71,7 +72,7 @@ echo $this->doctype();
                         <li>
                             <a href="<?php echo $this->url('contributions/Contribution', array('action' => 'showAll')) ?>">
                                 Contributions <span class="badge badge-inverse"> 
-                                    <?php echo \Contribution\Entity\Contribution::$count; ?>
+                                    <?php echo \Contribution\Entity\Contribution::getCount(); ?>
                                 </span>
                             </a>
                         </li>

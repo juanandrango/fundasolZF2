@@ -5,26 +5,19 @@ use Zend\Form\Annotation;
 
 /** 
 * Contribution Entity with Business Logic
-*
-* An Contribution provides a payment plan. It calculates the payment total depending on some interest
-* and Late Payment Fees if applicable. It has 2 states: Open and Close. An Contribution is open 
-* if payments are due. If all payments were done, the contribution is automatically "close". The contribution
-* is always open until all payments have been submitted.
 * 
-* An Contribution will create Payment Objects and is the only interface to create and destroy objects 
-* of type Payment from the database. 
-* 
-* The nPaid field keeps track of how many payments have been done so far. It should return the 
-* number of payments with status ONTIME and/or LATE
-* 
-* Lastly, an contribution can only be destroyed if the status is closed. It will get destroyed via the Investor
-* interface only by the owner of the contribution. All Payments are destroyed with it. 
+* A contribution is some money and investor decides to consign to Fundasol. A contribution earns 
+* the investor some interest just like a Bank would. Once the investor retires the money corresponding 
+* to the contribution, the latter is considered closed, otherwise it is open. 
 * 
 * @ORM\Entity 
 * @Annotation\Name("Contribution")
 * @Annotation\Hydrator({"type":"Zend\Stdlib\Hydrator\ClassMethods", "options": {"underscoreSeparatedKeys": false}})
 */
 class Contribution {
+
+    // ============================== DataBase Columns ==============================//
+
     /**
     * @ORM\Id
     * @ORM\GeneratedValue(strategy="AUTO")
@@ -65,38 +58,7 @@ class Contribution {
     */
     protected $timeStamp;
 
-    //BUSINESS LOGIC *************************************************************
-
-    //Status
-    const OPEN = 'open';
-    const CLOSE = 'close';
-
-    //Statics
-    public static $count;
-
-    /**
-    * It gets called in the addAction function from the controller. 
-    *
-    * This function sets the defaults for a new contribution. The
-    * Default status is OPEN and payments are generated here.
-    *
-    * @param Service $objectManager The Entity Manager
-    */
-    public function initAdd($objectManager) {
-        $this->setTimeStamp();
-        $this->setStatus(Contribution::OPEN);
-    }
-
-    /**
-    * @return string An HTML formatted string to show reporting details about the contribution
-    */
-    public function getHTMLReport() {
-        return "";
-    }
-    
-    //END BUSINESS LOGIC ************************************************************
-
-    //Getters
+    // ------------------------------ Getters ------------------------------ //
     public function getContributionId() {
         return $this->contributionId;
     }
@@ -112,7 +74,8 @@ class Contribution {
     public function getTimeStamp() {
         return $this->timeStamp;
     }
-    //Setters
+    
+    // ------------------------------ Setters ------------------------------ //
     public function setAmount($newAmount) {
         $this->amount = $newAmount;
     }
@@ -120,9 +83,43 @@ class Contribution {
         $this->investor = $c;
     }
     public function setStatus($s) {
-   		$this->status = $s;
-   	}
-   	public function setTimeStamp() {
+        $this->status = $s;
+    }
+    public function setTimeStamp() {
         $this->timeStamp = new \DateTime("now");
-   	}
+    }
+
+
+    // ============================== Business Logic ============================== //
+
+    // ------------------------------ Constants ------------------------------ //
+
+    //Status
+    const OPEN = 'open';
+    const CLOSE = 'close';
+
+    // ------------------------------ Static Properties ------------------------------ //
+    private static $count;
+
+    // ------------------------------ Static Methods ------------------------------ //
+    public static function getCount() {
+        return Contribution::$count;
+    }
+    public static function updateCount($objectManager) {
+        Contribution::$count = count($objectManager->getRepository('Contribution\Entity\Contribution')->findAll());
+    }
+
+    // ------------------------------ Public Methods ------------------------------ //
+    /**
+    * It is called in the addAction function from the controller. 
+    *
+    * This function sets the defaults for a new contribution. The
+    * Default status is OPEN.
+    *
+    * @param Service $objectManager The Entity Manager
+    */
+    public function initAdd($objectManager) {
+        $this->setTimeStamp();
+        $this->setStatus(Contribution::OPEN);
+    }
 }

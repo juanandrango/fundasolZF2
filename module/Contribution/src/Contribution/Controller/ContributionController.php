@@ -11,44 +11,52 @@ use DoctrineORMModule\Form\Annotation\AnnotationBuilder;
 
 class ContributionController extends AbstractActionController {
     
+    // ------------------------------ Properties ------------------------------ //
     /**
     * It is the Entity manager provided by Doctrine
     * @var Service
     */
     protected $objectManager;
 
+    // ------------------------------ Methods ------------------------------ //
     /**
     * @return Service Entity Manager instance
     */
     private function getObjectManager() {
         return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
-    }
-    private function getClientRepository() {
-        return $this->objectManager->getRepository('Client\Entity\Client');
-    }
-    private function getContributionRepository() {
-        return $this->objectManager->getRepository('Contribution\Entity\Contribution');
-    }
-    private function getAccountRepository() {
-        return $this->objectManager->getRepository('Account\Entity\Account');
-    }
-    private function getInvestorRepository() {
-        return $this->objectManager->getRepository('Investor\Entity\Investor');
+    }   
+
+    /**
+    * @param string $repoStr The name of the Class 
+    * @return Repository Should return the corresponding repository
+    */
+    private function getRepository($repoStr) {
+        if ($this->objectManager == null) {
+            $this->objectManager = $this->getObjectManager();
+        }
+        return $this->objectManager->getRepository($repoStr . "\\Entity\\" . $repoStr);
     }
 
+
     private function updateCounts() {
-        $this->objectManager = $this->getObjectManager();
-        \Client\Entity\Client::$count = count($this->getClientRepository()->findAll());
-        \Investor\Entity\Investor::$count = count($this->getInvestorRepository()->findAll());
-        \Account\Entity\Account::$count = count($this->getAccountRepository()->findAll());
-        \Contribution\Entity\Contribution::$count = count($this->getContributionRepository()->findAll());
+        if ($this->objectManager == null) {
+            $this->objectManager = $this->getObjectManager();        
+        }
+        \Client\Entity\Client::updateCount($this->objectManager);
+        \Investor\Entity\Investor::updateCount($this->objectManager);
+        \Account\Entity\Account::updateCount($this->objectManager);
+        \Contribution\Entity\Contribution::updateCount($this->objectManager);
     }
+
+
+    // ============================== Action Methods ============================== //
 
     public function showAllAction() {
         $this->updateCounts();
         $this->objectManager = $this->getObjectManager();
+
         return new ViewModel( array(
-            'allContributions' => $this->getContributionRepository()->findAll() 
+            'allContributions' => $this->getRepository('Contribution')->findAll() 
             )
         );
     }
@@ -58,11 +66,13 @@ class ContributionController extends AbstractActionController {
         if ($this->params()->fromRoute('contributionId', 0) != "") {
             $this->objectManager = $this->getObjectManager();
             $contributionId = $this->params()->fromRoute('contributionId', 0);
-            $contribution = $this->getContributionRepository()->findOneBy(array("contributionId" => $contributionId));    
-            return new ViewModel( array(
-                'contribution' => $contribution
-                ) 
-            );
+            $contribution = $this->getRepository('Contribution')->findOneBy(array("contributionId" => $contributionId));    
+            if ($contribution != null) {
+                return new ViewModel( array(
+                    'contribution' => $contribution
+                    ) 
+                );    
+            }
         }
         $this->redirect()->toRoute('home'); 
     }
@@ -70,15 +80,15 @@ class ContributionController extends AbstractActionController {
     public function addAction() {
         $this->updateCounts();    
         if($this->getRequest()->isPost()) {
-            $this->objectManager = $this->getObjectManager();            
-            $builder = new AnnotationBuilder($this->objectManager);
-            $form = $builder->createForm(new \Contribution\Entity\Contribution);
-            $form->setHydrator(new DoctrineHydrator($this->objectManager,'Contribution\Entity\Contribution'));           
             $investorId = (int)$this->getRequest()->getPost('investorId');
             if ($investorId != null) {
-                $investor = $this->getInvestorRepository()->findOneBy(array('investorId' => $investorId));
+                $this->objectManager = $this->getObjectManager();            
+                $investor = $this->getRepository('Investor')->findOneBy(array('investorId' => $investorId));
                 if ($investor != null) {
-                    $contribution = new \Contribution\Entity\Contribution;
+                    $contribution = new \Contribution\Entity\Contribution;                    
+                    $builder = new AnnotationBuilder($this->objectManager);
+                    $form = $builder->createForm(new \Contribution\Entity\Contribution);
+                    $form->setHydrator(new DoctrineHydrator($this->objectManager,'Contribution\Entity\Contribution'));                                       
                     $form->bind($contribution);
                     if ($this->getRequest()->getPost('addContributionSubmit') != null) {
                         $form->setData($this->getRequest()->getPost());                                                
@@ -90,20 +100,21 @@ class ContributionController extends AbstractActionController {
                             $this->objectManager->flush();                                              
                             return $this->redirect()->toRoute('contributions/Contribution', 
                                 array(
-                                    'action'    => 'show',
-                                    'contributionId'   => $contribution->getContributionId()
+                                    'action'            => 'show',
+                                    'contributionId'    => $contribution->getContributionId()
                                 )
                             );
                         } 
                     } 
-                    //First Time 
-                    return new ViewModel( array('form' => $form, 'investorId' => $investorId));
+                    return new ViewModel( 
+                        array(
+                            'form'          => $form, 
+                            'investorId'    => $investorId
+                        )
+                    );
                 } 
-                //No investor Found with investor ID
             }
-            //No investor ID given
         }
-        //No Post at all
         return $this->redirect()->toRoute('home');
     }
 }

@@ -1,9 +1,0 @@
-<h2> Delete Client </h2>
-<form action='delete' method='post'>
-	<p>Are you sure you want to delete client <?php echo $this->clientId; ?> ?</p>
-	<div class="form-actions">
-		<input type="hidden" name="clientId" value="<?php echo $this->clientId; ?>"/>
-		<button type="submit" name="sureDelete" value="yes" class="btn btn-danger"> Yes </button>
-		<button type="submit" name="sureDelete" value="no" class="btn"> No </button>
-	</div>
-</form>
