@@ -166,11 +166,11 @@ class Payment {
     /**
     * Sets the dueDate property taking a date as the start date and offsetting it
     * by a period of time times the nPayment attribute
-    * @param date @date The start date for the offset
+    * @param string @date The start date for the offset
     * @param string @aPeriod The period is defined in Account. So far only WEEKLY
     */
     public function setDueDate($date, $aPeriod) {
-        $aDate = clone $date;
+        $aDate = new \DateTime($date);
         if ($aPeriod == \Account\Entity\Account::WEEKLY) {
             $dateInterval = 7 * ((int)$this->getPaymentNumber() - 1) . ' days';
             date_add($aDate, date_interval_create_from_date_string($dateInterval));    

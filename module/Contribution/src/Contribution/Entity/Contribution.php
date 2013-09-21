@@ -33,7 +33,7 @@ class Contribution {
     * @Annotation\Options({"label":"Amount:"})
     * @Annotation\Filter({"name": "StringTrim"})
     * @Annotation\Validator({"name":"NotEmpty"})
-    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^\d+$/"}})
+    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^[1-9]+[0-9]*$/"}})
     */
     protected $amount;
   

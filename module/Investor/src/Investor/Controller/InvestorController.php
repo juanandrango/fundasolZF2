@@ -108,15 +108,15 @@ class InvestorController extends AbstractActionController {
     }
 
     public function addAction() {        
-        if ($this->getRequest()->isPost()) {
-            $this->updateCounts();
-            $this->objectManager = $this->getObjectManager();        
-            $builder = new AnnotationBuilder($this->objectManager);
-            $form = $builder->createForm(new \Investor\Entity\Investor);
-            $form->setHydrator(new DoctrineHydrator($this->objectManager,'Investor\Entity\Investor'));
-            $investor = new \Investor\Entity\Investor;
-            $form->bind($investor);
-            $form->setData($this->getRequest()->getPost());
+        $this->updateCounts();
+        $this->objectManager = $this->getObjectManager();        
+        $builder = new AnnotationBuilder($this->objectManager);
+        $form = $builder->createForm(new \Investor\Entity\Investor);
+        $form->setHydrator(new DoctrineHydrator($this->objectManager,'Investor\Entity\Investor'));
+        $investor = new \Investor\Entity\Investor;
+        $form->bind($investor);
+        $form->setData($this->getRequest()->getPost());
+        if ($this->getRequest()->isPost()) {           
             $stateId = $this->getRequest()->getPost('stateId');
             if ($form->isValid() && \Investor\Entity\Investor::isUniqueStateId($this->objectManager, $stateId, $form)) {
                 $investor->setTimeStamp();
@@ -129,9 +129,8 @@ class InvestorController extends AbstractActionController {
                         'investorId'    => $investorId, 
                     )
                 );                 
-            }
-            return new ViewModel( array('form' => $form)); 
+            }            
         }
-        $this->redirect()->toRoute('home');
+        return new ViewModel( array('form' => $form)); 
     }
 }

@@ -3,9 +3,17 @@
 $payments = $this->payments;
 $accounts = $this->accounts;
 
-$startDate = $this->rangeStart;
-$endDate = $this->rangeEnd;
+if ($this->rangeStart != null) {
+	$startDate = $this->rangeStart;	
+} else {
+	$startDate = date('Y-m-d');
+}
 
+if ($this->rangeEnd != null) {
+	$endDate = $this->rangeEnd;
+} else {
+	$endDate = date('Y-m-d');
+}
 
 
 $expectedArray = \Fundasol\Model\Fundasol::getExpectedArray($payments, $startDate, $endDate);

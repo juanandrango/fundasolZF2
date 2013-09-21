@@ -73,13 +73,13 @@ class AccountController extends AbstractActionController {
         if ($this->params()->fromRoute('accountId', 0) != "") {
             $this->objectManager = $this->getObjectManager();
             $accountId = $this->params()->fromRoute('accountId', 0);
-            $account = $this->getRepository('Account')->findOneBy(array("accountId" => $accountId));
+            $account = $this->getRepository('Account')->findOneBy(array('accountId' => $accountId));
             return new ViewModel( array(
                 'account' => $account
                 ) 
             );
         }
-        $this->redirect()->toRoute('home'); 
+        $this->redirect()->toRoute('home');
     }
 
     public function approveAction() {
@@ -87,19 +87,19 @@ class AccountController extends AbstractActionController {
         if ($this->getRequest()->isPost()) {
             $accountId = (int)$this->getRequest()->getPost('accountId');
             if ($accountId != null) {
-                $this->objectManager = $this->getObjectManager();            
+                $this->objectManager = $this->getObjectManager();     
                 $account = $this->getRepository('Account')->findOneBy(array('accountId' => $accountId));
                 if ($account != null) {
-                    $account->approve($this->objectManager);
+                    $account->approve($this->objectManager);                    
                     $this->objectManager->flush();
-                    return $this->redirect()->toRoute('accounts/Account', 
+                    return $this->redirect()->toRoute('accounts/Account',
                         array(
                             'action'    => 'show',
                             'accountId' => $account->getAccountId()
                         )
-                    ); 
+                    );
                 }
-            }            
+            }   
         }
         return $this->redirect()->toRoute('home');
     }
@@ -109,63 +109,63 @@ class AccountController extends AbstractActionController {
         if ($this->getRequest()->isPost()) {
             $accountId = (int)$this->getRequest()->getPost('accountId');
             if ($accountId != null) {
-                $this->objectManager = $this->getObjectManager();            
+                $this->objectManager = $this->getObjectManager();
                 $account = $this->getRepository('Account')->findOneBy(array('accountId' => $accountId));
                 if ($account != null) {
                     $account->deny($this->objectManager);
                     $this->objectManager->flush();
-                    return $this->redirect()->toRoute('accounts/Account', 
+                    return $this->redirect()->toRoute('accounts/Account',
                         array(
                             'action'    => 'show',
                             'accountId' => $account->getAccountId()
                         )
-                    ); 
+                    );
                 }
-            }            
+            }   
         }
         return $this->redirect()->toRoute('home');
     }
 
     public function requestAction() {
-        $this->updateCounts();    
+        $this->updateCounts();
         if($this->getRequest()->isPost()) {
             $clientId = (int)$this->getRequest()->getPost('clientId');
             if ($clientId != null) {
-                $this->objectManager = $this->getObjectManager();                        
+                $this->objectManager = $this->getObjectManager();
                 $client = $this->getRepository('Client')->findOneBy(array('clientId' => $clientId));
                 if ($client != null) {
                     $account = new \Account\Entity\Account;
                     $builder = new AnnotationBuilder($this->objectManager);
                     $form = $builder->createForm(new \Account\Entity\Account);
-                    $form->setHydrator(new DoctrineHydrator($this->objectManager,'Account\Entity\Account'));                       
+                    $form->setHydrator(new DoctrineHydrator($this->objectManager,'Account\Entity\Account'));
                     $form->bind($account);
                     if ($this->getRequest()->getPost('requestAccountSubmit') != null) {
                         $form->setData($this->getRequest()->getPost());
-                        $requestDate = $this->getRequest()->getPost('requestDate`');
+                        $requestDate = $this->getRequest()->getPost('requestDate');
                         $firstPayDate = $this->getRequest()->getPost('firstPayDate');
-                        if ($form->isValid() 
-                            && \Account\Entity\Account::areDatesValid($requestDate, $firstPayDate, $form)) {                            
+                        if ($form->isValid()
+                            && \Account\Entity\Account::areDatesValid($requestDate, $firstPayDate, $form)) {
                             $account->setClient($client);
-                            $account->initRequest();                            
+                            $account->initRequest();
                             $this->objectManager->persist($account);
                             $client->getAccounts()->add($account);
-                            $this->objectManager->flush();                                              
-                            return $this->redirect()->toRoute('accounts/Account', 
+                            $this->objectManager->flush();
+                            return $this->redirect()->toRoute('accounts/Account',
                                 array(
                                     'action'    => 'show',
                                     'accountId' => $account->getAccountId()
                                 )
-                            );                            
-                        } 
-                    } 
-                    return new ViewModel( 
+                            );
+                        }
+                    }
+                    return new ViewModel(
                         array(
-                            'form' => $form, 
+                            'form' => $form,
                             'clientId' => $clientId
                         )
                     );
-                }                 
-            }            
+                }
+            }        
         }
         return $this->redirect()->toRoute('home');
     }
@@ -175,7 +175,7 @@ class AccountController extends AbstractActionController {
         if($this->getRequest()->isPost()) {
             $accountId = (int)$this->getRequest()->getPost('accountId');
             if ($accountId != null) {
-                $this->objectManager = $this->getObjectManager();        
+                $this->objectManager = $this->getObjectManager();
                 $account = $this->getRepository('Account')->findOneBy(array('accountId' => $accountId));
                 if ($account != null) {
                     $payment = $account->getNextDuePayment();
@@ -185,7 +185,7 @@ class AccountController extends AbstractActionController {
                             //Validate and process
                             $account->processNextDuePayment($this->objectManager, $payment);
                             $this->objectManager->flush();
-                            return $this->redirect()->toRoute('accounts/Account', 
+                            return $this->redirect()->toRoute('accounts/Account',
                                 array(
                                     'action'    => 'show',
                                     'accountId' => $accountId,
@@ -200,11 +200,11 @@ class AccountController extends AbstractActionController {
                                 )
                             );
                         }
-                    }                    
-                } 
-            }   
-        } 
-        return $this->redirect()->toRoute('accounts/Account', 
+                    }
+                }
+            }
+        }
+        return $this->redirect()->toRoute('accounts/Account',
             array(
                 'action'    => 'showAll'
             )

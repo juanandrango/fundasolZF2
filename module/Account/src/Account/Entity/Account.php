@@ -68,7 +68,7 @@ class Account {
     * @Annotation\Options({"label":"Amount:"})
     * @Annotation\Filter({"name": "StringTrim"})
     * @Annotation\Validator({"name":"NotEmpty"})
-    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^\d+$/"}})
+    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^[1-9]+[0-9]*$/"}})
     */
     protected $amount;
 
@@ -118,6 +118,16 @@ class Account {
     */
     protected $timeStamp;
 
+    /**
+    * @ORM\Column(type="string", nullable = false)
+    * @Annotation\Attributes({"type":"text"})
+    * @Annotation\Options({"label":"Interest (Annual):"})
+    * @Annotation\Filter({"name": "StringTrim"})
+    * @Annotation\Validator({"name":"NotEmpty"})
+    * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^[1-9]+.[0-9]*$|^[0-9]+.[0-9]*$/"}})
+    */
+    protected $interest;
+
     // ------------------------------ Getters ------------------------------ //
     public function getAccountId() {
         return $this->accountId;
@@ -158,6 +168,9 @@ class Account {
     public function getTimeStamp() {
         return $this->timeStamp;
     }
+    public function getInterest() {
+        return $this->interest;
+    }
     // ------------------------------ Setters ------------------------------ //
     public function setRequestDate($rd) {
         $this->requestDate = $rd;
@@ -188,6 +201,9 @@ class Account {
     }
     public function setTimeStamp() {
         $this->timeStamp = new \DateTime("now");
+    }
+    public function setInterest($i) {
+        $this->interest = $i;
     }
 
     // ============================== Business Logic ============================== //
@@ -287,15 +303,16 @@ class Account {
     * @param Service $objectManager The Entity Manager
     */
     private function generatePayments($objectManager) {
-        if ($this->getPayments() == null) {
+        if ($this->getPayments()->count() == 0) {
+            $paymentAmount = $this->calculatePaymentPerPeriod();
             for ($i = 0 ; $i < $this->getNPayments() ; $i++) {
                 $payment = new \Payment\Entity\Payment;
-                $payment->setAmount(number_format($this->getAmount()/$this->getNPayments(), 2, '.', '') + "");
+                $payment->setAmount(number_format($paymentAmount, 2, '.', '') + "");
                 $payment->setPaymentNumber($i + 1);
                 $payment->setAccount($this);
                 $payment->setStatus(\Payment\Entity\Payment::DUE);
                 $payment->setTimeStamp();
-                $payment->setDueDate($this->getFirstPayDate(), $this->getPayPeriod());
+                $payment->setDueDate($this->getFirstPayDateStr(null), $this->getPayPeriod());                
                 $objectManager->persist($payment);
                 $this->getPayments()->add($payment);
             }
@@ -426,4 +443,14 @@ class Account {
         }
         return $record; 
     }    
+
+    public function calculatePaymentPerPeriod() {
+        if ($this->getPayPeriod() == Account::WEEKLY) {
+            $weeklyInterest = $this->getInterest()/52.0;
+            $total = $this->getAmount() * pow(1 + $weeklyInterest, $this->getNPayments()); 
+            return $total/$this->getNPayments();
+        }
+        return 100.0;
+    }
 }
+            
